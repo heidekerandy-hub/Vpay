@@ -320,24 +320,28 @@ async function checkSession() {
         }
     } = await supabaseClient.auth.getSession();
 
-
     if (session) {
-
         showDashboard(session.user);
-
     }
-
 }
 
 
-/* =========================
-   START VPAY
-   ========================= */
+/* Detect login after email confirmation */
 
-checkSession();
+supabaseClient.auth.onAuthStateChange(
+    async function (event, session) {
 
-console.log(
-    "VPay authentication loaded"
+        console.log("Auth event:", event);
+
+        if (
+            event === "SIGNED_IN" &&
+            session
+        ) {
+            showDashboard(session.user);
+        }
+
+    }
 );
 
-initializeVPay();
+
+checkSession();
