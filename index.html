@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VPay</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <header class="topbar">
+        <div class="logo">VPay</div>
+        <button class="profile-btn">👤</button>
+    </header>
+
+    <main class="container">
+
+        <section class="welcome">
+            <p>Welcome back</p>
+            <h1>Manage your money smarter.</h1>
+        </section>
+
+        <section class="balance-card">
+            <p>Total Balance</p>
+            <h2>₦0.00</h2>
+
+            <div class="balance-actions">
+                <button id="addMoneyBtn">＋ Add Money</button>
+                <button id="sendMoneyBtn">↗ Send Money</button>
+            </div>
+        </section>
+
+        <section class="quick-actions">
+            <h2>Quick Actions</h2>
+
+            <div class="action-grid">
+                <button>💰 Add Money</button>
+                <button>💸 Send Money</button>
+                <button>📊 Transactions</button>
+                <button>🎯 Savings Goal</button>
+            </div>
+        </section>
+
+        <section class="transactions">
+            <div class="section-header">
+                <h2>Recent Transactions</h2>
+                <button>View all</button>
+            </div>
+
+            <div id="transactionList" class="empty-state">
+                <div class="empty-icon">💳</div>
+                <h3>No transactions yet</h3>
+                <p>Your recent VPay transactions will appear here.</p>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <p>© 2026 VPay</p>
+    </footer>
+
+    <script src="app.js"></script>
+
+</body>
+</html>
