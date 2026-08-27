@@ -1,3 +1,6 @@
+.hidden {
+    display: none !important;
+}
 * {
     margin: 0;
     padding: 0;
@@ -175,3 +178,4 @@ footer {
         font-size: 32px;
     }
 }
+
