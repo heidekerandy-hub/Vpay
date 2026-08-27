@@ -1,0 +1,177 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f5f7fb;
+    color: #172033;
+    min-height: 100vh;
+}
+
+.topbar {
+    height: 70px;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    border-bottom: 1px solid #e8ebf2;
+}
+
+.logo {
+    font-size: 28px;
+    font-weight: 800;
+    color: #2563eb;
+}
+
+.profile-btn {
+    border: none;
+    background: #eef3ff;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    font-size: 18px;
+}
+
+.container {
+    width: 100%;
+    max-width: 850px;
+    margin: auto;
+    padding: 25px 18px 40px;
+}
+
+.welcome p {
+    color: #697386;
+    margin-bottom: 6px;
+}
+
+.welcome h1 {
+    font-size: 26px;
+    margin-bottom: 22px;
+}
+
+.balance-card {
+    background: #2563eb;
+    color: white;
+    padding: 25px;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.2);
+}
+
+.balance-card p {
+    opacity: 0.85;
+}
+
+.balance-card h2 {
+    font-size: 36px;
+    margin: 8px 0 25px;
+}
+
+.balance-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.balance-actions button {
+    flex: 1;
+    border: none;
+    padding: 13px;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.balance-actions button:first-child {
+    background: white;
+    color: #2563eb;
+}
+
+.balance-actions button:last-child {
+    background: #1749b5;
+    color: white;
+}
+
+.quick-actions {
+    margin-top: 30px;
+}
+
+.quick-actions h2,
+.transactions h2 {
+    font-size: 19px;
+    margin-bottom: 15px;
+}
+
+.action-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.action-grid button {
+    background: white;
+    border: 1px solid #e6eaf0;
+    padding: 18px 12px;
+    border-radius: 14px;
+    font-weight: 600;
+    color: #263247;
+    cursor: pointer;
+}
+
+.transactions {
+    margin-top: 30px;
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.section-header button {
+    border: none;
+    background: none;
+    color: #2563eb;
+    cursor: pointer;
+}
+
+.empty-state {
+    background: white;
+    padding: 35px 20px;
+    text-align: center;
+    border-radius: 16px;
+    border: 1px solid #e6eaf0;
+}
+
+.empty-icon {
+    font-size: 35px;
+    margin-bottom: 10px;
+}
+
+.empty-state h3 {
+    margin-bottom: 7px;
+}
+
+.empty-state p {
+    color: #7b8495;
+    font-size: 14px;
+}
+
+footer {
+    text-align: center;
+    padding: 25px;
+    color: #8992a3;
+    font-size: 13px;
+}
+
+@media (max-width: 500px) {
+    .welcome h1 {
+        font-size: 23px;
+    }
+
+    .balance-card h2 {
+        font-size: 32px;
+    }
+}
