@@ -1,11 +1,11 @@
 "use strict";
 
-/* =========================
+/* ==========================================
    SUPABASE CONNECTION
-   ========================= */
+   ========================================== */
 
-const SUPABASE_URL ="https://kjkxqrjbchnonbncnzni.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY ="sb_publishable_yd2PC23MRQsBvOBeE9Sr3g_Bo6_9J3j";
+const SUPABASE_URL = "YOUR_SUPABASE_PROJECT_URL";
+const SUPABASE_PUBLISHABLE_KEY = "YOUR_SUPABASE_PUBLISHABLE_KEY";
 
 const supabaseClient = window.supabase.createClient(
     SUPABASE_URL,
@@ -13,9 +13,17 @@ const supabaseClient = window.supabase.createClient(
 );
 
 
-/* =========================
+/* ==========================================
+   VARIABLES
+   ========================================== */
+
+let signupMode = false;
+let transactionType = "income";
+
+
+/* ==========================================
    ELEMENTS
-   ========================= */
+   ========================================== */
 
 const authScreen = document.getElementById("authScreen");
 const dashboard = document.getElementById("dashboard");
@@ -36,129 +44,244 @@ const switchText = document.getElementById("switchText");
 const authMessage = document.getElementById("authMessage");
 
 const logoutButton = document.getElementById("logoutButton");
+
 const userName = document.getElementById("userName");
 
+const totalBalance = document.getElementById("totalBalance");
+const totalIncome = document.getElementById("totalIncome");
+const totalExpenses = document.getElementById("totalExpenses");
 
-/* =========================
-   MODE
-   ========================= */
+const transactionList =
+    document.getElementById("transactionList");
 
-let signupMode = false;
+const transactionModal =
+    document.getElementById("transactionModal");
 
+const modalTitle =
+    document.getElementById("modalTitle");
 
-/* =========================
-   SWITCH LOGIN / SIGNUP
-   ========================= */
+const modalDescription =
+    document.getElementById("modalDescription");
 
-switchAuth.addEventListener("click", function () {
+const transactionAmount =
+    document.getElementById("transactionAmount");
 
-    signupMode = !signupMode;
+const transactionDescription =
+    document.getElementById("transactionDescription");
 
-    authMessage.textContent = "";
+const saveTransaction =
+    document.getElementById("saveTransaction");
 
-    if (signupMode) {
+const transactionMessage =
+    document.getElementById("transactionMessage");
 
-        authTitle.textContent = "Create your VPay account";
-
-        authSubtitle.textContent =
-            "Start managing your money smarter.";
-
-        nameField.classList.remove("hidden");
-
-        authButton.textContent = "Create Account";
-
-        switchText.textContent =
-            "Already have an account?";
-
-        switchAuth.textContent =
-            "Login";
-
-    } else {
-
-        authTitle.textContent =
-            "Welcome to VPay";
-
-        authSubtitle.textContent =
-            "Manage your money smarter.";
-
-        nameField.classList.add("hidden");
-
-        authButton.textContent =
-            "Login";
-
-        switchText.textContent =
-            "Don't have an account?";
-
-        switchAuth.textContent =
-            "Create account";
-    }
-});
+const closeModal =
+    document.getElementById("closeModal");
 
 
-/* =========================
-   AUTH BUTTON
-   ========================= */
+/* ==========================================
+   MONEY FORMAT
+   ========================================== */
 
-authButton.addEventListener("click", async function () {
+function formatMoney(amount) {
 
-    const userEmail = email.value.trim();
-    const userPassword = password.value;
-    const name = fullName.value.trim();
+    return new Intl.NumberFormat(
+        "en-NG",
+        {
+            style: "currency",
+            currency: "NGN",
+            minimumFractionDigits: 2
+        }
+    ).format(amount || 0);
 
-    authMessage.textContent = "";
-
-    if (!userEmail || !userPassword) {
-
-        authMessage.textContent =
-            "Please enter your email and password.";
-
-        return;
-    }
+}
 
 
-    /* =========================
-       SIGNUP
-       ========================= */
+/* ==========================================
+   SHOW LOGIN / SIGNUP
+   ========================================== */
 
-    if (signupMode) {
+switchAuth.addEventListener(
+    "click",
+    function () {
 
-        if (!name) {
+        signupMode = !signupMode;
 
-            authMessage.textContent =
-                "Please enter your full name.";
+        authMessage.textContent = "";
 
-            return;
+        if (signupMode) {
+
+            authTitle.textContent =
+                "Create your VPay account";
+
+            authSubtitle.textContent =
+                "Start managing your money smarter.";
+
+            nameField.classList.remove("hidden");
+
+            authButton.textContent =
+                "Create Account";
+
+            switchText.textContent =
+                "Already have an account?";
+
+            switchAuth.textContent =
+                "Login";
+
+        } else {
+
+            authTitle.textContent =
+                "Welcome to VPay";
+
+            authSubtitle.textContent =
+                "Manage your money smarter.";
+
+            nameField.classList.add("hidden");
+
+            authButton.textContent =
+                "Login";
+
+            switchText.textContent =
+                "Don't have an account?";
+
+            switchAuth.textContent =
+                "Create account";
+
         }
 
-        if (userPassword.length < 6) {
+    }
+);
+
+
+/* ==========================================
+   LOGIN / SIGNUP
+   ========================================== */
+
+authButton.addEventListener(
+    "click",
+    async function () {
+
+        const userEmail =
+            email.value.trim();
+
+        const userPassword =
+            password.value;
+
+        const name =
+            fullName.value.trim();
+
+
+        authMessage.textContent = "";
+
+
+        if (!userEmail || !userPassword) {
 
             authMessage.textContent =
-                "Password must be at least 6 characters.";
+                "Please enter your email and password.";
 
             return;
+
         }
 
+
+        /* SIGNUP */
+
+        if (signupMode) {
+
+            if (!name) {
+
+                authMessage.textContent =
+                    "Please enter your full name.";
+
+                return;
+
+            }
+
+
+            if (userPassword.length < 6) {
+
+                authMessage.textContent =
+                    "Password must be at least 6 characters.";
+
+                return;
+
+            }
+
+
+            authButton.disabled = true;
+
+            authMessage.textContent =
+                "Creating your account...";
+
+
+            const { data, error } =
+                await supabaseClient.auth.signUp({
+
+                    email: userEmail,
+
+                    password: userPassword,
+
+                    options: {
+
+                        data: {
+                            full_name: name
+                        }
+
+                    }
+
+                });
+
+
+            if (error) {
+
+                authMessage.textContent =
+                    error.message;
+
+                authButton.disabled = false;
+
+                return;
+
+            }
+
+
+            authButton.disabled = false;
+
+
+            if (data.session) {
+
+                await createProfile(
+                    data.user,
+                    name
+                );
+
+                showDashboard(data.user);
+
+            } else {
+
+                authMessage.textContent =
+                    "Account created. Please check your email to confirm your account.";
+
+            }
+
+            return;
+
+        }
+
+
+        /* LOGIN */
 
         authButton.disabled = true;
 
         authMessage.textContent =
-            "Creating your account...";
+            "Logging in...";
 
 
         const { data, error } =
-            await supabaseClient.auth.signUp({
+            await supabaseClient.auth.signInWithPassword({
 
                 email: userEmail,
 
-                password: userPassword,
-
-                options: {
-
-                    data: {
-                        full_name: name
-                    }
-
-                }
+                password: userPassword
 
             });
 
@@ -171,89 +294,62 @@ authButton.addEventListener("click", async function () {
             authButton.disabled = false;
 
             return;
-        }
-
-
-        /* Create profile */
-
-        if (data.user) {
-
-            const { error: profileError } =
-                await supabaseClient
-                    .from("profiles")
-                    .insert({
-
-                        id: data.user.id,
-
-                        full_name: name
-
-                    });
-
-
-            if (profileError) {
-
-                console.error(
-                    "Profile error:",
-                    profileError.message
-                );
-
-            }
 
         }
 
-
-        authMessage.textContent =
-            "Account created successfully. Check your email if confirmation is required.";
 
         authButton.disabled = false;
 
-        return;
+        showDashboard(data.user);
+
     }
+);
 
 
-    /* =========================
-       LOGIN
-       ========================= */
+/* ==========================================
+   CREATE PROFILE
+   ========================================== */
 
-    authButton.disabled = true;
+async function createProfile(user, name) {
 
-    authMessage.textContent =
-        "Logging in...";
+    if (!user) return;
 
 
-    const { data, error } =
-        await supabaseClient.auth.signInWithPassword({
+    const { error } =
+        await supabaseClient
+            .from("profiles")
+            .upsert({
 
-            email: userEmail,
+                id: user.id,
 
-            password: userPassword
+                full_name:
+                    name ||
+                    user.user_metadata?.full_name ||
+                    "VPay User"
 
-        });
+            });
 
 
     if (error) {
 
-        authMessage.textContent =
-            error.message;
+        console.log(
+            "Profile setup:",
+            error.message
+        );
 
-        authButton.disabled = false;
-
-        return;
     }
 
-
-    authButton.disabled = false;
-
-    showDashboard(data.user);
-
-});
+}
 
 
-/* =========================
+/* ==========================================
    SHOW DASHBOARD
-   ========================= */
+   ========================================== */
 
 async function showDashboard(user) {
+
+    if (!user) return;
+
 
     authScreen.classList.add("hidden");
 
@@ -271,10 +367,13 @@ async function showDashboard(user) {
                 .from("profiles")
                 .select("full_name")
                 .eq("id", user.id)
-                .single();
+                .maybeSingle();
+
 
         if (data) {
+
             name = data.full_name;
+
         }
 
     }
@@ -283,12 +382,473 @@ async function showDashboard(user) {
     userName.textContent =
         name || "VPay User";
 
+
+    await loadTransactions();
+
 }
 
 
-/* =========================
+/* ==========================================
+   OPEN ADD MONEY
+   ========================================== */
+
+function openAddMoney() {
+
+    transactionType = "income";
+
+    modalTitle.textContent =
+        "Add Money";
+
+    modalDescription.textContent =
+        "Record money received.";
+
+    transactionAmount.value = "";
+
+    transactionDescription.value = "";
+
+    transactionMessage.textContent = "";
+
+    transactionModal.classList.remove("hidden");
+
+}
+
+
+/* ==========================================
+   OPEN EXPENSE
+   ========================================== */
+
+function openAddExpense() {
+
+    transactionType = "expense";
+
+    modalTitle.textContent =
+        "Add Expense";
+
+    modalDescription.textContent =
+        "Record money you spent.";
+
+    transactionAmount.value = "";
+
+    transactionDescription.value = "";
+
+    transactionMessage.textContent = "";
+
+    transactionModal.classList.remove("hidden");
+
+}
+
+
+/* ==========================================
+   BUTTONS
+   ========================================== */
+
+document
+    .getElementById("addMoneyBtn")
+    .addEventListener(
+        "click",
+        openAddMoney
+    );
+
+
+document
+    .getElementById("quickAddMoney")
+    .addEventListener(
+        "click",
+        openAddMoney
+    );
+
+
+document
+    .getElementById("addExpenseBtn")
+    .addEventListener(
+        "click",
+        openAddExpense
+    );
+
+
+document
+    .getElementById("quickAddExpense")
+    .addEventListener(
+        "click",
+        openAddExpense
+    );
+
+
+/* ==========================================
+   CLOSE MODAL
+   ========================================== */
+
+closeModal.addEventListener(
+    "click",
+    function () {
+
+        transactionModal.classList.add(
+            "hidden"
+        );
+
+    }
+);
+
+
+/* ==========================================
+   SAVE TRANSACTION
+   ========================================== */
+
+saveTransaction.addEventListener(
+    "click",
+    async function () {
+
+        const amount =
+            Number(transactionAmount.value);
+
+        const description =
+            transactionDescription.value.trim();
+
+
+        transactionMessage.textContent = "";
+
+
+        if (!amount || amount <= 0) {
+
+            transactionMessage.textContent =
+                "Enter a valid amount.";
+
+            return;
+
+        }
+
+
+        saveTransaction.disabled = true;
+
+        saveTransaction.textContent =
+            "Saving...";
+
+
+        const {
+            data: {
+                user
+            }
+        } = await supabaseClient.auth.getUser();
+
+
+        if (!user) {
+
+            transactionMessage.textContent =
+                "Your session has expired. Please login again.";
+
+            saveTransaction.disabled = false;
+
+            saveTransaction.textContent =
+                "Save Transaction";
+
+            return;
+
+        }
+
+
+        const { error } =
+            await supabaseClient
+                .from("transactions")
+                .insert({
+
+                    user_id: user.id,
+
+                    type: transactionType,
+
+                    amount: amount,
+
+                    description:
+                        description ||
+                        (
+                            transactionType === "income"
+                                ? "Money received"
+                                : "Expense"
+                        )
+
+                });
+
+
+        if (error) {
+
+            console.error(error);
+
+            transactionMessage.textContent =
+                error.message;
+
+            saveTransaction.disabled = false;
+
+            saveTransaction.textContent =
+                "Save Transaction";
+
+            return;
+
+        }
+
+
+        saveTransaction.disabled = false;
+
+        saveTransaction.textContent =
+            "Save Transaction";
+
+
+        transactionMessage.textContent =
+            "Transaction saved successfully.";
+
+
+        await loadTransactions();
+
+
+        setTimeout(
+            function () {
+
+                transactionModal.classList.add(
+                    "hidden"
+                );
+
+            },
+            700
+        );
+
+    }
+);
+
+
+/* ==========================================
+   LOAD TRANSACTIONS
+   ========================================== */
+
+async function loadTransactions() {
+
+    const {
+        data: {
+            user
+        }
+    } = await supabaseClient.auth.getUser();
+
+
+    if (!user) return;
+
+
+    const { data, error } =
+        await supabaseClient
+            .from("transactions")
+            .select("*")
+            .eq("user_id", user.id)
+            .order(
+                "created_at",
+                {
+                    ascending: false
+                }
+            );
+
+
+    if (error) {
+
+        console.error(
+            "Transaction loading error:",
+            error.message
+        );
+
+        return;
+
+    }
+
+
+    calculateBalance(data || []);
+
+    displayTransactions(data || []);
+
+}
+
+
+/* ==========================================
+   CALCULATE BALANCE
+   ========================================== */
+
+function calculateBalance(transactions) {
+
+    let income = 0;
+
+    let expenses = 0;
+
+
+    transactions.forEach(
+        function (transaction) {
+
+            const amount =
+                Number(transaction.amount) || 0;
+
+
+            if (transaction.type === "income") {
+
+                income += amount;
+
+            }
+
+
+            if (transaction.type === "expense") {
+
+                expenses += amount;
+
+            }
+
+        }
+    );
+
+
+    const balance =
+        income - expenses;
+
+
+    totalIncome.textContent =
+        formatMoney(income);
+
+    totalExpenses.textContent =
+        formatMoney(expenses);
+
+    totalBalance.textContent =
+        formatMoney(balance);
+
+}
+
+
+/* ==========================================
+   DISPLAY TRANSACTIONS
+   ========================================== */
+
+function displayTransactions(transactions) {
+
+    if (!transactions.length) {
+
+        transactionList.innerHTML = `
+
+            <div class="empty-state">
+
+                <div class="empty-icon">
+                    💳
+                </div>
+
+                <h3>
+                    No transactions yet
+                </h3>
+
+                <p>
+                    Add your first income or expense.
+                </p>
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    transactionList.innerHTML =
+        transactions
+            .slice(0, 10)
+            .map(
+                function (transaction) {
+
+                    const isIncome =
+                        transaction.type === "income";
+
+
+                    const sign =
+                        isIncome ? "+" : "-";
+
+
+                    const icon =
+                        isIncome ? "🟢" : "🔴";
+
+
+                    const date =
+                        new Date(
+                            transaction.created_at
+                        ).toLocaleDateString(
+                            "en-NG",
+                            {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric"
+                            }
+                        );
+
+
+                    return `
+
+                        <div class="transaction-item">
+
+                            <div class="transaction-icon">
+                                ${icon}
+                            </div>
+
+                            <div class="transaction-info">
+
+                                <strong>
+                                    ${
+                                        transaction.description ||
+                                        (
+                                            isIncome
+                                                ? "Money received"
+                                                : "Expense"
+                                        )
+                                    }
+                                </strong>
+
+                                <small>
+                                    ${date}
+                                </small>
+
+                            </div>
+
+                            <div
+                                class="transaction-amount ${
+                                    isIncome
+                                        ? "income"
+                                        : "expense"
+                                }"
+                            >
+                                ${sign}${formatMoney(
+                                    transaction.amount
+                                )}
+                            </div>
+
+                        </div>
+
+                    `;
+
+                }
+            )
+            .join("");
+
+}
+
+
+/* ==========================================
+   REFRESH
+   ========================================== */
+
+document
+    .getElementById("refreshTransactions")
+    .addEventListener(
+        "click",
+        loadTransactions
+    );
+
+
+document
+    .getElementById("refreshTransactions2")
+    .addEventListener(
+        "click",
+        loadTransactions
+    );
+
+
+/* ==========================================
    LOGOUT
-   ========================= */
+   ========================================== */
 
 logoutButton.addEventListener(
     "click",
@@ -304,13 +864,15 @@ logoutButton.addEventListener(
 
         password.value = "";
 
+        fullName.value = "";
+
     }
 );
 
 
-/* =========================
-   CHECK LOGIN SESSION
-   ========================= */
+/* ==========================================
+   SESSION CHECK
+   ========================================== */
 
 async function checkSession() {
 
@@ -320,28 +882,42 @@ async function checkSession() {
         }
     } = await supabaseClient.auth.getSession();
 
+
     if (session) {
+
         showDashboard(session.user);
+
     }
+
 }
 
 
-/* Detect login after email confirmation */
+/* ==========================================
+   AUTH STATE
+   ========================================== */
 
 supabaseClient.auth.onAuthStateChange(
-    async function (event, session) {
-
-        console.log("Auth event:", event);
+    function (event, session) {
 
         if (
             event === "SIGNED_IN" &&
             session
         ) {
+
             showDashboard(session.user);
+
         }
 
     }
 );
 
 
+/* ==========================================
+   START
+   ========================================== */
+
 checkSession();
+
+console.log(
+    "VPay wallet system loaded"
+);
