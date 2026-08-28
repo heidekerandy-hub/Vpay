@@ -576,22 +576,34 @@ if (quickAddExpense) {
    CLOSE MODAL
    ========================================== */
 
-if (closeModal) {
+if (closeModal && transactionModal) {
 
-    closeModal.addEventListener(
-        "click",
-        function () {
+    closeModal.onclick = function () {
 
-            transactionModal.classList.add(
-                "hidden"
-            );
+        transactionModal.classList.add("hidden");
 
-        }
-    );
+        transactionMessage.textContent = "";
+
+        transactionAmount.value = "";
+
+        transactionDescription.value = "";
+
+    };
 
 }
+document.addEventListener("keydown", function (event) {
 
+    if (
+        event.key === "Escape" &&
+        transactionModal &&
+        !transactionModal.classList.contains("hidden")
+    ) {
 
+        transactionModal.classList.add("hidden");
+
+    }
+
+});
 /* ==========================================
    CLOSE MODAL WHEN CLICKING OUTSIDE
    ========================================== */
