@@ -237,7 +237,24 @@
         </div>
 
     </div>
+<input
+    type="file"
+    id="bulkFileInput"
+    accept=".csv,.xlsx,.xls"
+    hidden
+>
 
+<div id="bulkSummary" class="hidden">
+    <span>Recipients: </span>
+    <strong id="recipientCount">0</strong>
+
+    <span>Total: </span>
+    <strong id="bulkTotalAmount">₦0.00</strong>
+</div>
+
+<div id="recipientTableContainer">
+    <!-- Table appears here after upload -->
+</div>
 </section>
 
             <!-- TRANSACTIONS -->
