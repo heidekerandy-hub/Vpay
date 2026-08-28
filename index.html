@@ -195,38 +195,20 @@
 
             </section>
 <!-- BULK TRANSFER -->
-
-<section class="bulk-transfer-card">
-
-    <div class="bulk-transfer-header">
-        <div>
-            <span class="section-label">PAYMENTS</span>
-            <h2>Bulk Transfer</h2>
-            <p>Send money to multiple recipients at once.</p>
-        </div>
-
-        <div class="bulk-transfer-icon">
-            💸
-        </div>
-    </div>
-
-    <div class="bulk-transfer-actions">
-
-        <button
-            id="uploadBulkBtn"
-            class="bulk-primary-btn"
-            type="button"
-        >
-            📁 Upload Recipient File
-        </button>
-
-        <input
-            type="file"
-            id="bulkFileInput"
-            accept=".csv,.xlsx,.xls"
-            hidden
-        >
-
+<button
+    id="uploadBulkBtn"
+    class="bulk-primary-btn"
+    type="button"
+    onclick="document.getElementById('bulkFileInput').click()"
+>
+    📁 Upload Recipient File
+</button>
+            <input
+    type="file"
+    id="bulkFileInput"
+    accept=".csv,.xlsx,.xls"
+    hidden
+>
         <button
             id="manualBulkBtn"
             class="bulk-secondary-btn"
