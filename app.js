@@ -1,16 +1,20 @@
 "use strict";
 
 /* ==========================================
-   SUPABASE CONNECTION
+   VPAY - COMPLETE APP.JS
    ========================================== */
 
-const SUPABASE_URL = "YOUR_SUPABASE_PROJECT_URL";
-const SUPABASE_PUBLISHABLE_KEY = "YOUR_SUPABASE_PUBLISHABLE_KEY";
+const SUPABASE_URL =
+    "https://kjkxqrjbchnonbncnzni.supabase.co";
 
-const supabaseClient = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_PUBLISHABLE_KEY
-);
+const SUPABASE_PUBLISHABLE_KEY =
+    "sb_publishable_yd2PC23MRQsBvOBeE9Sr3g_Bo6_9J3j";
+
+const supabaseClient =
+    window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_PUBLISHABLE_KEY
+    );
 
 
 /* ==========================================
@@ -25,31 +29,56 @@ let transactionType = "income";
    ELEMENTS
    ========================================== */
 
-const authScreen = document.getElementById("authScreen");
-const dashboard = document.getElementById("dashboard");
+const authScreen =
+    document.getElementById("authScreen");
 
-const authTitle = document.getElementById("authTitle");
-const authSubtitle = document.getElementById("authSubtitle");
+const dashboard =
+    document.getElementById("dashboard");
 
-const nameField = document.getElementById("nameField");
-const fullName = document.getElementById("fullName");
+const authTitle =
+    document.getElementById("authTitle");
 
-const email = document.getElementById("email");
-const password = document.getElementById("password");
+const authSubtitle =
+    document.getElementById("authSubtitle");
 
-const authButton = document.getElementById("authButton");
-const switchAuth = document.getElementById("switchAuth");
+const nameField =
+    document.getElementById("nameField");
 
-const switchText = document.getElementById("switchText");
-const authMessage = document.getElementById("authMessage");
+const fullName =
+    document.getElementById("fullName");
 
-const logoutButton = document.getElementById("logoutButton");
+const email =
+    document.getElementById("email");
 
-const userName = document.getElementById("userName");
+const password =
+    document.getElementById("password");
 
-const totalBalance = document.getElementById("totalBalance");
-const totalIncome = document.getElementById("totalIncome");
-const totalExpenses = document.getElementById("totalExpenses");
+const authButton =
+    document.getElementById("authButton");
+
+const switchAuth =
+    document.getElementById("switchAuth");
+
+const switchText =
+    document.getElementById("switchText");
+
+const authMessage =
+    document.getElementById("authMessage");
+
+const logoutButton =
+    document.getElementById("logoutButton");
+
+const userName =
+    document.getElementById("userName");
+
+const totalBalance =
+    document.getElementById("totalBalance");
+
+const totalIncome =
+    document.getElementById("totalIncome");
+
+const totalExpenses =
+    document.getElementById("totalExpenses");
 
 const transactionList =
     document.getElementById("transactionList");
@@ -78,6 +107,24 @@ const transactionMessage =
 const closeModal =
     document.getElementById("closeModal");
 
+const addMoneyBtn =
+    document.getElementById("addMoneyBtn");
+
+const addExpenseBtn =
+    document.getElementById("addExpenseBtn");
+
+const quickAddMoney =
+    document.getElementById("quickAddMoney");
+
+const quickAddExpense =
+    document.getElementById("quickAddExpense");
+
+const refreshTransactions =
+    document.getElementById("refreshTransactions");
+
+const refreshTransactions2 =
+    document.getElementById("refreshTransactions2");
+
 
 /* ==========================================
    MONEY FORMAT
@@ -92,13 +139,13 @@ function formatMoney(amount) {
             currency: "NGN",
             minimumFractionDigits: 2
         }
-    ).format(amount || 0);
+    ).format(Number(amount) || 0);
 
 }
 
 
 /* ==========================================
-   SHOW LOGIN / SIGNUP
+   LOGIN / SIGNUP SWITCH
    ========================================== */
 
 switchAuth.addEventListener(
@@ -184,7 +231,9 @@ authButton.addEventListener(
         }
 
 
-        /* SIGNUP */
+        /* ==============================
+           SIGN UP
+           ============================== */
 
         if (signupMode) {
 
@@ -232,19 +281,17 @@ authButton.addEventListener(
                 });
 
 
+            authButton.disabled = false;
+
+
             if (error) {
 
                 authMessage.textContent =
                     error.message;
 
-                authButton.disabled = false;
-
                 return;
 
             }
-
-
-            authButton.disabled = false;
 
 
             if (data.session) {
@@ -254,12 +301,14 @@ authButton.addEventListener(
                     name
                 );
 
-                showDashboard(data.user);
+                await showDashboard(
+                    data.user
+                );
 
             } else {
 
                 authMessage.textContent =
-                    "Account created. Please check your email to confirm your account.";
+                    "Account created successfully. Check your email if confirmation is required.";
 
             }
 
@@ -268,7 +317,9 @@ authButton.addEventListener(
         }
 
 
-        /* LOGIN */
+        /* ==============================
+           LOGIN
+           ============================== */
 
         authButton.disabled = true;
 
@@ -286,21 +337,22 @@ authButton.addEventListener(
             });
 
 
+        authButton.disabled = false;
+
+
         if (error) {
 
             authMessage.textContent =
                 error.message;
-
-            authButton.disabled = false;
 
             return;
 
         }
 
 
-        authButton.disabled = false;
-
-        showDashboard(data.user);
+        await showDashboard(
+            data.user
+        );
 
     }
 );
@@ -310,7 +362,10 @@ authButton.addEventListener(
    CREATE PROFILE
    ========================================== */
 
-async function createProfile(user, name) {
+async function createProfile(
+    user,
+    name
+) {
 
     if (!user) return;
 
@@ -333,7 +388,7 @@ async function createProfile(user, name) {
     if (error) {
 
         console.log(
-            "Profile setup:",
+            "Profile error:",
             error.message
         );
 
@@ -351,9 +406,13 @@ async function showDashboard(user) {
     if (!user) return;
 
 
-    authScreen.classList.add("hidden");
+    authScreen.classList.add(
+        "hidden"
+    );
 
-    dashboard.classList.remove("hidden");
+    dashboard.classList.remove(
+        "hidden"
+    );
 
 
     let name =
@@ -372,7 +431,8 @@ async function showDashboard(user) {
 
         if (data) {
 
-            name = data.full_name;
+            name =
+                data.full_name;
 
         }
 
@@ -394,7 +454,8 @@ async function showDashboard(user) {
 
 function openAddMoney() {
 
-    transactionType = "income";
+    transactionType =
+        "income";
 
     modalTitle.textContent =
         "Add Money";
@@ -402,24 +463,39 @@ function openAddMoney() {
     modalDescription.textContent =
         "Record money received.";
 
-    transactionAmount.value = "";
+    transactionAmount.value =
+        "";
 
-    transactionDescription.value = "";
+    transactionDescription.value =
+        "";
 
-    transactionMessage.textContent = "";
+    transactionMessage.textContent =
+        "";
 
-    transactionModal.classList.remove("hidden");
+    transactionModal.classList.remove(
+        "hidden"
+    );
+
+    setTimeout(
+        function () {
+
+            transactionAmount.focus();
+
+        },
+        100
+    );
 
 }
 
 
 /* ==========================================
-   OPEN EXPENSE
+   OPEN ADD EXPENSE
    ========================================== */
 
 function openAddExpense() {
 
-    transactionType = "expense";
+    transactionType =
+        "expense";
 
     modalTitle.textContent =
         "Add Expense";
@@ -427,190 +503,260 @@ function openAddExpense() {
     modalDescription.textContent =
         "Record money you spent.";
 
-    transactionAmount.value = "";
+    transactionAmount.value =
+        "";
 
-    transactionDescription.value = "";
+    transactionDescription.value =
+        "";
 
-    transactionMessage.textContent = "";
+    transactionMessage.textContent =
+        "";
 
-    transactionModal.classList.remove("hidden");
+    transactionModal.classList.remove(
+        "hidden"
+    );
+
+    setTimeout(
+        function () {
+
+            transactionAmount.focus();
+
+        },
+        100
+    );
 
 }
 
 
 /* ==========================================
-   BUTTONS
+   BUTTON EVENTS
    ========================================== */
 
-document
-    .getElementById("addMoneyBtn")
-    .addEventListener(
+if (addMoneyBtn) {
+
+    addMoneyBtn.addEventListener(
         "click",
         openAddMoney
     );
 
+}
 
-document
-    .getElementById("quickAddMoney")
-    .addEventListener(
+
+if (quickAddMoney) {
+
+    quickAddMoney.addEventListener(
         "click",
         openAddMoney
     );
 
+}
 
-document
-    .getElementById("addExpenseBtn")
-    .addEventListener(
+
+if (addExpenseBtn) {
+
+    addExpenseBtn.addEventListener(
         "click",
         openAddExpense
     );
 
+}
 
-document
-    .getElementById("quickAddExpense")
-    .addEventListener(
+
+if (quickAddExpense) {
+
+    quickAddExpense.addEventListener(
         "click",
         openAddExpense
     );
+
+}
 
 
 /* ==========================================
    CLOSE MODAL
    ========================================== */
 
-closeModal.addEventListener(
-    "click",
-    function () {
+if (closeModal) {
 
-        transactionModal.classList.add(
-            "hidden"
-        );
+    closeModal.addEventListener(
+        "click",
+        function () {
 
-    }
-);
+            transactionModal.classList.add(
+                "hidden"
+            );
+
+        }
+    );
+
+}
+
+
+/* ==========================================
+   CLOSE MODAL WHEN CLICKING OUTSIDE
+   ========================================== */
+
+if (transactionModal) {
+
+    transactionModal.addEventListener(
+        "click",
+        function (event) {
+
+            if (
+                event.target ===
+                transactionModal
+            ) {
+
+                transactionModal.classList.add(
+                    "hidden"
+                );
+
+            }
+
+        }
+    );
+
+}
 
 
 /* ==========================================
    SAVE TRANSACTION
    ========================================== */
 
-saveTransaction.addEventListener(
-    "click",
-    async function () {
+if (saveTransaction) {
 
-        const amount =
-            Number(transactionAmount.value);
+    saveTransaction.addEventListener(
+        "click",
+        async function () {
 
-        const description =
-            transactionDescription.value.trim();
-
-
-        transactionMessage.textContent = "";
-
-
-        if (!amount || amount <= 0) {
-
-            transactionMessage.textContent =
-                "Enter a valid amount.";
-
-            return;
-
-        }
-
-
-        saveTransaction.disabled = true;
-
-        saveTransaction.textContent =
-            "Saving...";
-
-
-        const {
-            data: {
-                user
-            }
-        } = await supabaseClient.auth.getUser();
-
-
-        if (!user) {
-
-            transactionMessage.textContent =
-                "Your session has expired. Please login again.";
-
-            saveTransaction.disabled = false;
-
-            saveTransaction.textContent =
-                "Save Transaction";
-
-            return;
-
-        }
-
-
-        const { error } =
-            await supabaseClient
-                .from("transactions")
-                .insert({
-
-                    user_id: user.id,
-
-                    type: transactionType,
-
-                    amount: amount,
-
-                    description:
-                        description ||
-                        (
-                            transactionType === "income"
-                                ? "Money received"
-                                : "Expense"
-                        )
-
-                });
-
-
-        if (error) {
-
-            console.error(error);
-
-            transactionMessage.textContent =
-                error.message;
-
-            saveTransaction.disabled = false;
-
-            saveTransaction.textContent =
-                "Save Transaction";
-
-            return;
-
-        }
-
-
-        saveTransaction.disabled = false;
-
-        saveTransaction.textContent =
-            "Save Transaction";
-
-
-        transactionMessage.textContent =
-            "Transaction saved successfully.";
-
-
-        await loadTransactions();
-
-
-        setTimeout(
-            function () {
-
-                transactionModal.classList.add(
-                    "hidden"
+            const amount =
+                Number(
+                    transactionAmount.value
                 );
 
-            },
-            700
-        );
+            const description =
+                transactionDescription.value.trim();
 
-    }
-);
+
+            transactionMessage.textContent =
+                "";
+
+
+            if (
+                !amount ||
+                amount <= 0
+            ) {
+
+                transactionMessage.textContent =
+                    "Please enter a valid amount.";
+
+                return;
+
+            }
+
+
+            saveTransaction.disabled =
+                true;
+
+            saveTransaction.textContent =
+                "Saving...";
+
+
+            try {
+
+                const {
+                    data: {
+                        user
+                    }
+                } =
+                    await supabaseClient.auth.getUser();
+
+
+                if (!user) {
+
+                    throw new Error(
+                        "Your session has expired. Please login again."
+                    );
+
+                }
+
+
+                const { error } =
+                    await supabaseClient
+                        .from("transactions")
+                        .insert({
+
+                            user_id:
+                                user.id,
+
+                            amount:
+                                amount,
+
+                            type:
+                                transactionType,
+
+                            description:
+                                description ||
+                                (
+                                    transactionType ===
+                                    "income"
+                                        ? "Money received"
+                                        : "Expense"
+                                )
+
+                        });
+
+
+                if (error) {
+
+                    throw error;
+
+                }
+
+
+                transactionMessage.textContent =
+                    "Transaction saved successfully ✓";
+
+
+                await loadTransactions();
+
+
+                setTimeout(
+                    function () {
+
+                        transactionModal.classList.add(
+                            "hidden"
+                        );
+
+                    },
+                    700
+                );
+
+
+            } catch (error) {
+
+                console.error(
+                    "Transaction error:",
+                    error
+                );
+
+                transactionMessage.textContent =
+                    error.message ||
+                    "Unable to save transaction.";
+
+            }
+
+
+            saveTransaction.disabled =
+                false;
+
+            saveTransaction.textContent =
+                "Save Transaction";
+
+        }
+    );
+
+}
 
 
 /* ==========================================
@@ -623,17 +769,24 @@ async function loadTransactions() {
         data: {
             user
         }
-    } = await supabaseClient.auth.getUser();
+    } =
+        await supabaseClient.auth.getUser();
 
 
     if (!user) return;
 
 
-    const { data, error } =
+    const {
+        data,
+        error
+    } =
         await supabaseClient
             .from("transactions")
             .select("*")
-            .eq("user_id", user.id)
+            .eq(
+                "user_id",
+                user.id
+            )
             .order(
                 "created_at",
                 {
@@ -654,9 +807,13 @@ async function loadTransactions() {
     }
 
 
-    calculateBalance(data || []);
+    calculateBalance(
+        data || []
+    );
 
-    displayTransactions(data || []);
+    displayTransactions(
+        data || []
+    );
 
 }
 
@@ -665,7 +822,9 @@ async function loadTransactions() {
    CALCULATE BALANCE
    ========================================== */
 
-function calculateBalance(transactions) {
+function calculateBalance(
+    transactions
+) {
 
     let income = 0;
 
@@ -676,17 +835,25 @@ function calculateBalance(transactions) {
         function (transaction) {
 
             const amount =
-                Number(transaction.amount) || 0;
+                Number(
+                    transaction.amount
+                ) || 0;
 
 
-            if (transaction.type === "income") {
+            if (
+                transaction.type ===
+                "income"
+            ) {
 
                 income += amount;
 
             }
 
 
-            if (transaction.type === "expense") {
+            if (
+                transaction.type ===
+                "expense"
+            ) {
 
                 expenses += amount;
 
@@ -716,7 +883,12 @@ function calculateBalance(transactions) {
    DISPLAY TRANSACTIONS
    ========================================== */
 
-function displayTransactions(transactions) {
+function displayTransactions(
+    transactions
+) {
+
+    if (!transactionList) return;
+
 
     if (!transactions.length) {
 
@@ -752,15 +924,20 @@ function displayTransactions(transactions) {
                 function (transaction) {
 
                     const isIncome =
-                        transaction.type === "income";
+                        transaction.type ===
+                        "income";
 
 
                     const sign =
-                        isIncome ? "+" : "-";
+                        isIncome
+                            ? "+"
+                            : "-";
 
 
                     const icon =
-                        isIncome ? "🟢" : "🔴";
+                        isIncome
+                            ? "💰"
+                            : "💸";
 
 
                     const date =
@@ -803,16 +980,16 @@ function displayTransactions(transactions) {
 
                             </div>
 
-                            <div
-                                class="transaction-amount ${
-                                    isIncome
-                                        ? "income"
-                                        : "expense"
-                                }"
-                            >
+                            <div class="transaction-amount ${
+                                isIncome
+                                    ? "income"
+                                    : "expense"
+                            }">
+
                                 ${sign}${formatMoney(
                                     transaction.amount
                                 )}
+
                             </div>
 
                         </div>
@@ -830,48 +1007,60 @@ function displayTransactions(transactions) {
    REFRESH
    ========================================== */
 
-document
-    .getElementById("refreshTransactions")
-    .addEventListener(
+if (refreshTransactions) {
+
+    refreshTransactions.addEventListener(
         "click",
         loadTransactions
     );
 
+}
 
-document
-    .getElementById("refreshTransactions2")
-    .addEventListener(
+
+if (refreshTransactions2) {
+
+    refreshTransactions2.addEventListener(
         "click",
         loadTransactions
     );
+
+}
 
 
 /* ==========================================
    LOGOUT
    ========================================== */
 
-logoutButton.addEventListener(
-    "click",
-    async function () {
+if (logoutButton) {
 
-        await supabaseClient.auth.signOut();
+    logoutButton.addEventListener(
+        "click",
+        async function () {
 
-        dashboard.classList.add("hidden");
+            await supabaseClient.auth.signOut();
 
-        authScreen.classList.remove("hidden");
+            dashboard.classList.add(
+                "hidden"
+            );
 
-        email.value = "";
+            authScreen.classList.remove(
+                "hidden"
+            );
 
-        password.value = "";
+            email.value = "";
 
-        fullName.value = "";
+            password.value = "";
 
-    }
-);
+            fullName.value = "";
+
+        }
+    );
+
+}
 
 
 /* ==========================================
-   SESSION CHECK
+   CHECK EXISTING SESSION
    ========================================== */
 
 async function checkSession() {
@@ -880,12 +1069,15 @@ async function checkSession() {
         data: {
             session
         }
-    } = await supabaseClient.auth.getSession();
+    } =
+        await supabaseClient.auth.getSession();
 
 
     if (session) {
 
-        showDashboard(session.user);
+        await showDashboard(
+            session.user
+        );
 
     }
 
@@ -897,14 +1089,19 @@ async function checkSession() {
    ========================================== */
 
 supabaseClient.auth.onAuthStateChange(
-    function (event, session) {
+    async function (
+        event,
+        session
+    ) {
 
         if (
             event === "SIGNED_IN" &&
             session
         ) {
 
-            showDashboard(session.user);
+            await showDashboard(
+                session.user
+            );
 
         }
 
@@ -913,890 +1110,11 @@ supabaseClient.auth.onAuthStateChange(
 
 
 /* ==========================================
-   START
+   START APP
    ========================================== */
 
 checkSession();
 
 console.log(
-    "VPay wallet system loaded"
+    "VPay application loaded successfully"
 );
-// ===============================
-// VPAY TRANSACTION SYSTEM
-// ===============================
-
-const addMoneyBtn = document.getElementById("addMoneyBtn");
-const addExpenseBtn = document.getElementById("addExpenseBtn");
-
-const totalBalance = document.getElementById("totalBalance");
-const totalIncome = document.getElementById("totalIncome");
-const totalExpenses = document.getElementById("totalExpenses");
-
-
-// ADD MONEY
-if (addMoneyBtn) {
-
-    addMoneyBtn.addEventListener("click", async () => {
-
-        const amount = prompt("Enter amount received:");
-
-        if (!amount) return;
-
-        const value = Number(amount);
-
-        if (isNaN(value) || value <= 0) {
-            alert("Please enter a valid amount.");
-            return;
-        }
-
-        const description =
-            prompt("What is this money for?") ||
-            "Money received";
-
-
-        const {
-            data: {
-                user
-            }
-        } = await supabaseClient.auth.getUser();
-
-
-        if (!user) {
-
-            alert("Please login again.");
-
-            return;
-
-        }
-
-
-        const { error } =
-            await supabaseClient
-                .from("transactions")
-                .insert({
-
-                    user_id: user.id,
-
-                    amount: value,
-
-                    type: "income",
-
-                    description: description
-
-                });
-
-
-        if (error) {
-
-            console.error(error);
-
-            alert(
-                "Unable to save transaction: " +
-                error.message
-            );
-
-            return;
-
-        }
-
-
-        alert("Money added successfully!");
-
-        loadVPayBalance();
-
-    });
-
-}
-
-
-// ADD EXPENSE
-if (addExpenseBtn) {
-
-    addExpenseBtn.addEventListener("click", async () => {
-
-        const amount = prompt("Enter expense amount:");
-
-        if (!amount) return;
-
-        const value = Number(amount);
-
-        if (isNaN(value) || value <= 0) {
-
-            alert("Please enter a valid amount.");
-
-            return;
-
-        }
-
-
-        const description =
-            prompt("What did you spend it on?") ||
-            "Expense";
-
-
-        const {
-            data: {
-                user
-            }
-        } = await supabaseClient.auth.getUser();
-
-
-        if (!user) {
-
-            alert("Please login again.");
-
-            return;
-
-        }
-
-
-        const { error } =
-            await supabaseClient
-                .from("transactions")
-                .insert({
-
-                    user_id: user.id,
-
-                    amount: value,
-
-                    type: "expense",
-
-                    description: description
-
-                });
-
-
-        if (error) {
-
-            console.error(error);
-
-            alert(
-                "Unable to save expense: " +
-                error.message
-            );
-
-            return;
-
-        }
-
-
-        alert("Expense saved successfully!");
-
-        loadVPayBalance();
-
-    });
-
-}
-
-
-// LOAD BALANCE
-async function loadVPayBalance() {
-
-    const {
-        data: {
-            user
-        }
-    } = await supabaseClient.auth.getUser();
-
-
-    if (!user) return;
-
-
-    const { data, error } =
-        await supabaseClient
-            .from("transactions")
-            .select("amount,type")
-            .eq("user_id", user.id);
-
-
-    if (error) {
-
-        console.error(
-            "Balance error:",
-            error.message
-        );
-
-        return;
-
-    }
-
-
-    let income = 0;
-
-    let expenses = 0;
-
-
-    data.forEach(transaction => {
-
-        const amount =
-            Number(transaction.amount);
-
-
-        if (transaction.type === "income") {
-
-            income += amount;
-
-        }
-
-
-        if (transaction.type === "expense") {
-
-            expenses += amount;
-
-        }
-
-    });
-
-
-    const balance =
-        income - expenses;
-
-
-    if (totalBalance) {
-
-        totalBalance.textContent =
-            formatVPayMoney(balance);
-
-    }
-
-
-    if (totalIncome) {
-
-        totalIncome.textContent =
-            formatVPayMoney(income);
-
-    }
-
-
-    if (totalExpenses) {
-
-        totalExpenses.textContent =
-            formatVPayMoney(expenses);
-
-    }
-
-}
-
-
-// MONEY FORMAT
-function formatVPayMoney(amount) {
-
-    return new Intl.NumberFormat(
-        "en-NG",
-        {
-            style: "currency",
-            currency: "NGN"
-        }
-    ).format(amount || 0);
-
-}
-
-
-// LOAD BALANCE AFTER LOGIN
-supabaseClient.auth.onAuthStateChange(
-    (event, session) => {
-
-        if (
-            event === "SIGNED_IN" &&
-            session
-        ) {
-
-            setTimeout(
-                loadVPayBalance,
-                500
-            );
-
-        }
-
-    }
-);
-/* ==========================================
-   VPAY TRANSACTION SYSTEM
-   ========================================== */
-
-let transactionType = "income";
-
-
-/* ---------- ELEMENTS ---------- */
-
-const addMoneyBtn =
-    document.getElementById("addMoneyBtn");
-
-const addExpenseBtn =
-    document.getElementById("addExpenseBtn");
-
-const quickAddMoney =
-    document.getElementById("quickAddMoney");
-
-const quickAddExpense =
-    document.getElementById("quickAddExpense");
-
-const transactionModal =
-    document.getElementById("transactionModal");
-
-const closeModal =
-    document.getElementById("closeModal");
-
-const modalTitle =
-    document.getElementById("modalTitle");
-
-const modalDescription =
-    document.getElementById("modalDescription");
-
-const transactionAmount =
-    document.getElementById("transactionAmount");
-
-const transactionDescription =
-    document.getElementById("transactionDescription");
-
-const saveTransaction =
-    document.getElementById("saveTransaction");
-
-const transactionMessage =
-    document.getElementById("transactionMessage");
-
-
-/* ---------- OPEN ADD MONEY ---------- */
-
-function openAddMoney() {
-
-    transactionType = "income";
-
-    modalTitle.textContent =
-        "Add Money";
-
-    modalDescription.textContent =
-        "Record money received.";
-
-    transactionAmount.value = "";
-
-    transactionDescription.value = "";
-
-    transactionMessage.textContent = "";
-
-    transactionModal.classList.remove("hidden");
-
-}
-
-
-/* ---------- OPEN ADD EXPENSE ---------- */
-
-function openAddExpense() {
-
-    transactionType = "expense";
-
-    modalTitle.textContent =
-        "Add Expense";
-
-    modalDescription.textContent =
-        "Record money you spent.";
-
-    transactionAmount.value = "";
-
-    transactionDescription.value = "";
-
-    transactionMessage.textContent = "";
-
-    transactionModal.classList.remove("hidden");
-
-}
-
-
-/* ---------- BUTTON EVENTS ---------- */
-
-if (addMoneyBtn) {
-
-    addMoneyBtn.addEventListener(
-        "click",
-        openAddMoney
-    );
-
-}
-
-
-if (addExpenseBtn) {
-
-    addExpenseBtn.addEventListener(
-        "click",
-        openAddExpense
-    );
-
-}
-
-
-if (quickAddMoney) {
-
-    quickAddMoney.addEventListener(
-        "click",
-        openAddMoney
-    );
-
-}
-
-
-if (quickAddExpense) {
-
-    quickAddExpense.addEventListener(
-        "click",
-        openAddExpense
-    );
-
-}
-
-
-/* ---------- CLOSE MODAL ---------- */
-
-if (closeModal) {
-
-    closeModal.addEventListener(
-        "click",
-        function () {
-
-            transactionModal.classList.add(
-                "hidden"
-            );
-
-        }
-    );
-
-}
-
-
-/* ---------- SAVE TRANSACTION ---------- */
-
-if (saveTransaction) {
-
-    saveTransaction.addEventListener(
-        "click",
-        async function () {
-
-            const amount =
-                Number(
-                    transactionAmount.value
-                );
-
-            const description =
-                transactionDescription.value.trim();
-
-
-            transactionMessage.textContent = "";
-
-
-            /* VALIDATE */
-
-            if (!amount || amount <= 0) {
-
-                transactionMessage.textContent =
-                    "Please enter a valid amount.";
-
-                return;
-
-            }
-
-
-            saveTransaction.disabled = true;
-
-            saveTransaction.textContent =
-                "Saving...";
-
-
-            /* GET CURRENT USER */
-
-            const {
-                data: {
-                    user
-                }
-            } =
-                await supabaseClient.auth.getUser();
-
-
-            if (!user) {
-
-                transactionMessage.textContent =
-                    "Please log in again.";
-
-                saveTransaction.disabled = false;
-
-                saveTransaction.textContent =
-                    "Save Transaction";
-
-                return;
-
-            }
-
-
-            /* SAVE TO SUPABASE */
-
-            const { error } =
-                await supabaseClient
-                    .from("transactions")
-                    .insert({
-
-                        user_id: user.id,
-
-                        amount: amount,
-
-                        type: transactionType,
-
-                        description:
-                            description ||
-                            (
-                                transactionType ===
-                                "income"
-                                    ? "Money received"
-                                    : "Expense"
-                            )
-
-                    });
-
-
-            /* ERROR */
-
-            if (error) {
-
-                console.error(
-                    "Transaction error:",
-                    error
-                );
-
-                transactionMessage.textContent =
-                    error.message;
-
-                saveTransaction.disabled = false;
-
-                saveTransaction.textContent =
-                    "Save Transaction";
-
-                return;
-
-            }
-
-
-            /* SUCCESS */
-
-            transactionMessage.textContent =
-                "Transaction saved successfully!";
-
-
-            saveTransaction.disabled = false;
-
-            saveTransaction.textContent =
-                "Save Transaction";
-
-
-            /* REFRESH */
-
-            await loadTransactions();
-
-
-            /* CLOSE */
-
-            setTimeout(
-                function () {
-
-                    transactionModal.classList.add(
-                        "hidden"
-                    );
-
-                },
-                700
-            );
-
-        }
-    );
-
-}
-
-
-/* ==========================================
-   LOAD TRANSACTIONS
-   ========================================== */
-
-async function loadTransactions() {
-
-    const {
-        data: {
-            user
-        }
-    } =
-        await supabaseClient.auth.getUser();
-
-
-    if (!user) return;
-
-
-    const { data, error } =
-        await supabaseClient
-            .from("transactions")
-            .select("*")
-            .eq("user_id", user.id)
-            .order(
-                "created_at",
-                {
-                    ascending: false
-                }
-            );
-
-
-    if (error) {
-
-        console.error(
-            "Could not load transactions:",
-            error
-        );
-
-        return;
-
-    }
-
-
-    calculateVPayBalance(
-        data || []
-    );
-
-
-    displayVPayTransactions(
-        data || []
-    );
-
-}
-
-
-/* ==========================================
-   CALCULATE BALANCE
-   ========================================== */
-
-function calculateVPayBalance(
-    transactions
-) {
-
-    let income = 0;
-
-    let expenses = 0;
-
-
-    transactions.forEach(
-        function (transaction) {
-
-            const amount =
-                Number(transaction.amount) || 0;
-
-
-            if (
-                transaction.type ===
-                "income"
-            ) {
-
-                income += amount;
-
-            }
-
-
-            if (
-                transaction.type ===
-                "expense"
-            ) {
-
-                expenses += amount;
-
-            }
-
-        }
-    );
-
-
-    const balance =
-        income - expenses;
-
-
-    const balanceElement =
-        document.getElementById(
-            "totalBalance"
-        );
-
-    const incomeElement =
-        document.getElementById(
-            "totalIncome"
-        );
-
-    const expenseElement =
-        document.getElementById(
-            "totalExpenses"
-        );
-
-
-    if (balanceElement) {
-
-        balanceElement.textContent =
-            formatVPayMoney(balance);
-
-    }
-
-
-    if (incomeElement) {
-
-        incomeElement.textContent =
-            formatVPayMoney(income);
-
-    }
-
-
-    if (expenseElement) {
-
-        expenseElement.textContent =
-            formatVPayMoney(expenses);
-
-    }
-
-}
-
-
-/* ==========================================
-   DISPLAY TRANSACTIONS
-   ========================================== */
-
-function displayVPayTransactions(
-    transactions
-) {
-
-    const list =
-        document.getElementById(
-            "transactionList"
-        );
-
-
-    if (!list) return;
-
-
-    if (!transactions.length) {
-
-        list.innerHTML = `
-
-            <div class="empty-state">
-
-                <div class="empty-icon">
-                    💳
-                </div>
-
-                <h3>
-                    No transactions yet
-                </h3>
-
-                <p>
-                    Add your first income or expense.
-                </p>
-
-            </div>
-
-        `;
-
-        return;
-
-    }
-
-
-    list.innerHTML =
-        transactions
-            .slice(0, 10)
-            .map(
-                function (transaction) {
-
-                    const income =
-                        transaction.type ===
-                        "income";
-
-
-                    const sign =
-                        income ? "+" : "-";
-
-
-                    const icon =
-                        income ? "💰" : "💸";
-
-
-                    const date =
-                        new Date(
-                            transaction.created_at
-                        ).toLocaleDateString(
-                            "en-NG",
-                            {
-                                day: "numeric",
-                                month: "short",
-                                year: "numeric"
-                            }
-                        );
-
-
-                    return `
-
-                        <div class="transaction-item">
-
-                            <div class="transaction-icon">
-                                ${icon}
-                            </div>
-
-                            <div class="transaction-info">
-
-                                <strong>
-                                    ${
-                                        transaction.description ||
-                                        (
-                                            income
-                                                ? "Money received"
-                                                : "Expense"
-                                        )
-                                    }
-                                </strong>
-
-                                <small>
-                                    ${date}
-                                </small>
-
-                            </div>
-
-                            <div class="
-                                transaction-amount
-                                ${
-                                    income
-                                        ? "income"
-                                        : "expense"
-                                }
-                            ">
-
-                                ${sign}${formatVPayMoney(
-                                    transaction.amount
-                                )}
-
-                            </div>
-
-                        </div>
-
-                    `;
-
-                }
-            )
-            .join("");
-
-}
-
-
-/* ==========================================
-   FORMAT MONEY
-   ========================================== */
-
-function formatVPayMoney(
-    amount
-) {
-
-    return new Intl.NumberFormat(
-        "en-NG",
-        {
-            style: "currency",
-            currency: "NGN",
-            minimumFractionDigits: 2
-        }
-    ).format(
-        Number(amount) || 0
-    );
-
-}
