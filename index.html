@@ -343,28 +343,59 @@
 <!-- FILE INPUT -->
 
 <input
-    type="file"
-    id="bulkFileInput"
-    accept=".csv,.xlsx,.xls"
-    style="display: none;"
->
+  <section class="bulk-transfer-card">
 
-<!-- FILE STATUS -->
+    <div class="bulk-transfer-header">
+        ...
+    </div>
 
-<div
-    id="bulkFileStatus"
-    class="bulk-file-status hidden"
-></div>
+    <!-- ACTION BUTTONS -->
 
+    <div class="bulk-transfer-actions">
 
-                <!-- SUMMARY -->
+        <button
+            type="button"
+            class="bulk-primary-btn"
+            onclick="document.getElementById('bulkFileInput').click()"
+        >
+            📁 Upload Recipient File
+        </button>
 
-                <div
-                    id="bulkSummary"
-                    class="bulk-summary hidden"
-                >
+        <button
+            id="manualBulkBtn"
+            type="button"
+            class="bulk-secondary-btn"
+        >
+            ＋ Add Recipient Manually
+        </button>
 
-                    <div>
+    </div>
+
+    <!-- FILE INPUT -->
+
+    <input
+        type="file"
+        id="bulkFileInput"
+        accept=".csv,.xlsx,.xls"
+        style="display: none;"
+    >
+
+    <!-- FILE STATUS -->
+
+    <div
+        id="bulkFileStatus"
+        class="bulk-file-status hidden"
+    ></div>
+
+    <!-- SUMMARY -->
+
+    <div
+        id="bulkSummary"
+        class="bulk-summary hidden"
+    >
+        ...
+    </div>
+
 
                         <span>
                             Recipients
