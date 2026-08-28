@@ -194,7 +194,69 @@
                 </div>
 
             </section>
+<!-- BULK TRANSFER -->
 
+<section class="bulk-transfer-card">
+
+    <div class="bulk-transfer-header">
+        <div>
+            <span class="section-label">PAYMENTS</span>
+            <h2>Bulk Transfer</h2>
+            <p>Send money to multiple recipients at once.</p>
+        </div>
+
+        <div class="bulk-transfer-icon">
+            💸
+        </div>
+    </div>
+
+    <div class="bulk-transfer-actions">
+
+        <button
+            id="uploadBulkBtn"
+            class="bulk-primary-btn"
+            type="button"
+        >
+            📁 Upload Recipient File
+        </button>
+
+        <input
+            type="file"
+            id="bulkFileInput"
+            accept=".csv,.xlsx,.xls"
+            hidden
+        >
+
+        <button
+            id="manualBulkBtn"
+            class="bulk-secondary-btn"
+            type="button"
+        >
+            ＋ Add Recipients Manually
+        </button>
+
+    </div>
+
+    <div id="bulkTransferArea" class="bulk-transfer-area">
+
+        <div class="bulk-empty-state">
+
+            <div class="bulk-empty-icon">
+                📄
+            </div>
+
+            <h3>No recipient list yet</h3>
+
+            <p>
+                Upload an Excel or CSV file containing your recipients
+                to start a bulk transfer.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
 
             <!-- TRANSACTIONS -->
 
