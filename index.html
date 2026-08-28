@@ -8,9 +8,9 @@
     <title>VPay</title>
 
     <link rel="stylesheet" href="style.css">
-
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <body>
 
@@ -194,32 +194,101 @@
                 </div>
 
             </section>
-<!-- BULK TRANSFER -->
-<button
-    id="uploadBulkBtn"
-    class="bulk-primary-btn"
-    type="button"
-    onclick="document.getElementById('bulkFileInput').click()"
->
-    📁 Upload Recipient File
-</button>
-            <input
-    type="file"
-    id="bulkFileInput"
-    accept=".csv,.xlsx,.xls"
-    hidden
->
+<!-- ==========================================
+     BULK TRANSFER
+     ========================================== -->
+
+<section class="bulk-transfer-card">
+
+    <div class="bulk-transfer-header">
+
+        <div>
+            <span class="section-label">PAYMENTS</span>
+
+            <h2>Bulk Transfer</h2>
+
+            <p>
+                Send money to multiple recipients at once.
+            </p>
+        </div>
+
+        <div class="bulk-transfer-icon">
+            💸
+        </div>
+
+    </div>
+
+
+    <!-- ACTION BUTTONS -->
+
+    <div class="bulk-transfer-actions">
+
+        <button
+            id="uploadBulkBtn"
+            class="bulk-primary-btn"
+            type="button"
+        >
+            📁 Upload Recipient File
+        </button>
+
+
         <button
             id="manualBulkBtn"
             class="bulk-secondary-btn"
             type="button"
         >
-            ＋ Add Recipients Manually
+            ＋ Add Recipient Manually
         </button>
 
     </div>
 
-    <div id="bulkTransferArea" class="bulk-transfer-area">
+
+    <!-- HIDDEN FILE INPUT -->
+
+    <input
+        type="file"
+        id="bulkFileInput"
+        accept=".csv,.xlsx,.xls"
+        hidden
+    >
+
+
+    <!-- FILE STATUS -->
+
+    <div
+        id="bulkFileStatus"
+        class="bulk-file-status hidden"
+    ></div>
+
+
+    <!-- SUMMARY -->
+
+    <div
+        id="bulkSummary"
+        class="bulk-summary hidden"
+    >
+
+        <div>
+            <span>Recipients</span>
+            <strong id="recipientCount">0</strong>
+        </div>
+
+        <div>
+            <span>Total Transfer</span>
+            <strong id="bulkTotalAmount">
+                ₦0.00
+            </strong>
+        </div>
+
+    </div>
+
+
+    <!-- RECIPIENT TABLE -->
+
+    <div
+        id="recipientTableContainer"
+        class="recipient-table-container"
+    >
 
         <div class="bulk-empty-state">
 
@@ -227,79 +296,46 @@
                 📄
             </div>
 
-            <h3>No recipient list yet</h3>
+            <h3>
+                No recipient list yet
+            </h3>
 
             <p>
-                Upload an Excel or CSV file containing your recipients
-                to start a bulk transfer.
+                Upload an Excel or CSV file containing
+                your recipients to start a bulk transfer.
             </p>
 
         </div>
 
     </div>
-<input
-    type="file"
-    id="bulkFileInput"
-    accept=".csv,.xlsx,.xls"
-    hidden
->
-
-<div id="bulkSummary" class="hidden">
-    <span>Recipients: </span>
-    <strong id="recipientCount">0</strong>
-
-    <span>Total: </span>
-    <strong id="bulkTotalAmount">₦0.00</strong>
-</div>
-
-<div id="recipientTableContainer">
-    <!-- Table appears here after upload -->
-</div>
-</section>
-
-            <!-- TRANSACTIONS -->
-
-            <section class="transactions">
-
-                <div class="section-header">
-
-                    <h2>Recent Transactions</h2>
-
-                    <button id="refreshTransactions2">
-                        Refresh
-                    </button>
-
-                </div>
-
-                <div id="transactionList" class="transaction-list">
-
-                    <div class="empty-state">
-
-                        <div class="empty-icon">💳</div>
-
-                        <h3>No transactions yet</h3>
-
-                        <p>
-                            Add your first income or expense.
-                        </p>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-        </main>
 
 
-        <footer>
+    <!-- BULK ACTIONS -->
 
-            <p>© 2026 VPay</p>
+    <div
+        id="bulkTransferActions"
+        class="bulk-bottom-actions hidden"
+    >
 
-        </footer>
+        <button
+            id="clearRecipientsBtn"
+            class="bulk-danger-btn"
+            type="button"
+        >
+            🗑 Clear All
+        </button>
+
+        <button
+            id="processBulkBtn"
+            class="bulk-transfer-btn"
+            type="button"
+        >
+            💸 Continue to Transfer
+        </button>
 
     </div>
 
+</section>
 
     <!-- TRANSACTION MODAL -->
 
