@@ -110,3 +110,35 @@ authButton.addEventListener("click", async function () {
 
 
 console.log("VPay Login System Loaded");
+/* ==========================================
+   VPAY BULK FILE UPLOAD
+   ========================================== */
+
+const uploadBulkBtn = document.getElementById("uploadBulkBtn");
+const bulkFileInput = document.getElementById("bulkFileInput");
+
+if (uploadBulkBtn && bulkFileInput) {
+
+    uploadBulkBtn.addEventListener("click", function () {
+
+        console.log("Upload button clicked");
+
+        bulkFileInput.click();
+
+    });
+
+    bulkFileInput.addEventListener("change", function () {
+
+        const file = this.files[0];
+
+        if (!file) return;
+
+        console.log("File selected:", file.name);
+
+        alert("File selected: " + file.name);
+
+    });
+
+}
+
+console.log("VPAY BULK UPLOAD LOADED");
