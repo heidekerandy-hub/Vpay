@@ -1198,3 +1198,203 @@ if (bulkFileInput) {
     });
 
 }
+/* ==========================================
+   VPAY BULK TRANSFER FILE READER
+   ========================================== */
+
+const bulkFileInput =
+    document.getElementById("bulkFileInput");
+
+const bulkTransferArea =
+    document.getElementById("bulkTransferArea");
+
+
+if (bulkFileInput) {
+
+    bulkFileInput.addEventListener("change", async function () {
+
+        const file = this.files[0];
+
+        if (!file) return;
+
+        bulkTransferArea.innerHTML = `
+            <div class="bulk-file-selected">
+                <div class="bulk-file-icon">📄</div>
+
+                <div>
+                    <strong>${file.name}</strong>
+                    <p>Reading recipient information...</p>
+                </div>
+            </div>
+        `;
+
+        try {
+
+            const arrayBuffer =
+                await file.arrayBuffer();
+
+            const workbook =
+                XLSX.read(arrayBuffer, {
+                    type: "array"
+                });
+
+            const firstSheet =
+                workbook.Sheets[
+                    workbook.SheetNames[0]
+                ];
+
+            const rows =
+                XLSX.utils.sheet_to_json(
+                    firstSheet,
+                    {
+                        defval: ""
+                    }
+                );
+
+            if (!rows.length) {
+
+                bulkTransferArea.innerHTML = `
+                    <div class="empty-state">
+                        <h3>File is empty</h3>
+                        <p>Please upload a file containing recipients.</p>
+                    </div>
+                `;
+
+                return;
+
+            }
+
+            displayBulkRecipients(rows);
+
+        } catch (error) {
+
+            console.error(
+                "Bulk file error:",
+                error
+            );
+
+            bulkTransferArea.innerHTML = `
+                <div class="empty-state">
+                    <h3>Unable to read file</h3>
+                    <p>Please check your Excel or CSV file.</p>
+                </div>
+            `;
+
+        }
+
+    });
+
+}
+
+
+/* ==========================================
+   DISPLAY RECIPIENTS
+   ========================================== */
+
+function displayBulkRecipients(rows) {
+
+    const columns =
+        Object.keys(rows[0]);
+
+    const total =
+        rows.reduce(
+            function (sum, row) {
+
+                const amount =
+                    Number(
+                        row.amount ||
+                        row.Amount ||
+                        0
+                    );
+
+                return sum + amount;
+
+            },
+            0
+        );
+
+
+    let tableHTML = `
+
+        <div class="bulk-summary">
+
+            <div>
+                <span>Recipients</span>
+                <strong>${rows.length}</strong>
+            </div>
+
+            <div>
+                <span>Total Amount</span>
+                <strong>
+                    ${formatVPayMoney(total)}
+                </strong>
+            </div>
+
+        </div>
+
+        <div class="bulk-table-wrapper">
+
+            <table class="bulk-table">
+
+                <thead>
+                    <tr>
+    `;
+
+
+    columns.forEach(function (column) {
+
+        tableHTML += `
+            <th>${column}</th>
+        `;
+
+    });
+
+
+    tableHTML += `
+                    </tr>
+                </thead>
+
+                <tbody>
+    `;
+
+
+    rows.forEach(function (row) {
+
+        tableHTML += `<tr>`;
+
+        columns.forEach(function (column) {
+
+            tableHTML += `
+                <td>${row[column] || ""}</td>
+            `;
+
+        });
+
+        tableHTML += `</tr>`;
+
+    });
+
+
+    tableHTML += `
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <button
+            id="continueBulkTransfer"
+            class="bulk-primary-btn"
+            type="button"
+        >
+            Continue to Review →
+        </button>
+
+    `;
+
+
+    bulkTransferArea.innerHTML =
+        tableHTML;
+
+}
