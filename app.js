@@ -921,3 +921,292 @@ checkSession();
 console.log(
     "VPay wallet system loaded"
 );
+// ===============================
+// VPAY TRANSACTION SYSTEM
+// ===============================
+
+const addMoneyBtn = document.getElementById("addMoneyBtn");
+const addExpenseBtn = document.getElementById("addExpenseBtn");
+
+const totalBalance = document.getElementById("totalBalance");
+const totalIncome = document.getElementById("totalIncome");
+const totalExpenses = document.getElementById("totalExpenses");
+
+
+// ADD MONEY
+if (addMoneyBtn) {
+
+    addMoneyBtn.addEventListener("click", async () => {
+
+        const amount = prompt("Enter amount received:");
+
+        if (!amount) return;
+
+        const value = Number(amount);
+
+        if (isNaN(value) || value <= 0) {
+            alert("Please enter a valid amount.");
+            return;
+        }
+
+        const description =
+            prompt("What is this money for?") ||
+            "Money received";
+
+
+        const {
+            data: {
+                user
+            }
+        } = await supabaseClient.auth.getUser();
+
+
+        if (!user) {
+
+            alert("Please login again.");
+
+            return;
+
+        }
+
+
+        const { error } =
+            await supabaseClient
+                .from("transactions")
+                .insert({
+
+                    user_id: user.id,
+
+                    amount: value,
+
+                    type: "income",
+
+                    description: description
+
+                });
+
+
+        if (error) {
+
+            console.error(error);
+
+            alert(
+                "Unable to save transaction: " +
+                error.message
+            );
+
+            return;
+
+        }
+
+
+        alert("Money added successfully!");
+
+        loadVPayBalance();
+
+    });
+
+}
+
+
+// ADD EXPENSE
+if (addExpenseBtn) {
+
+    addExpenseBtn.addEventListener("click", async () => {
+
+        const amount = prompt("Enter expense amount:");
+
+        if (!amount) return;
+
+        const value = Number(amount);
+
+        if (isNaN(value) || value <= 0) {
+
+            alert("Please enter a valid amount.");
+
+            return;
+
+        }
+
+
+        const description =
+            prompt("What did you spend it on?") ||
+            "Expense";
+
+
+        const {
+            data: {
+                user
+            }
+        } = await supabaseClient.auth.getUser();
+
+
+        if (!user) {
+
+            alert("Please login again.");
+
+            return;
+
+        }
+
+
+        const { error } =
+            await supabaseClient
+                .from("transactions")
+                .insert({
+
+                    user_id: user.id,
+
+                    amount: value,
+
+                    type: "expense",
+
+                    description: description
+
+                });
+
+
+        if (error) {
+
+            console.error(error);
+
+            alert(
+                "Unable to save expense: " +
+                error.message
+            );
+
+            return;
+
+        }
+
+
+        alert("Expense saved successfully!");
+
+        loadVPayBalance();
+
+    });
+
+}
+
+
+// LOAD BALANCE
+async function loadVPayBalance() {
+
+    const {
+        data: {
+            user
+        }
+    } = await supabaseClient.auth.getUser();
+
+
+    if (!user) return;
+
+
+    const { data, error } =
+        await supabaseClient
+            .from("transactions")
+            .select("amount,type")
+            .eq("user_id", user.id);
+
+
+    if (error) {
+
+        console.error(
+            "Balance error:",
+            error.message
+        );
+
+        return;
+
+    }
+
+
+    let income = 0;
+
+    let expenses = 0;
+
+
+    data.forEach(transaction => {
+
+        const amount =
+            Number(transaction.amount);
+
+
+        if (transaction.type === "income") {
+
+            income += amount;
+
+        }
+
+
+        if (transaction.type === "expense") {
+
+            expenses += amount;
+
+        }
+
+    });
+
+
+    const balance =
+        income - expenses;
+
+
+    if (totalBalance) {
+
+        totalBalance.textContent =
+            formatVPayMoney(balance);
+
+    }
+
+
+    if (totalIncome) {
+
+        totalIncome.textContent =
+            formatVPayMoney(income);
+
+    }
+
+
+    if (totalExpenses) {
+
+        totalExpenses.textContent =
+            formatVPayMoney(expenses);
+
+    }
+
+}
+
+
+// MONEY FORMAT
+function formatVPayMoney(amount) {
+
+    return new Intl.NumberFormat(
+        "en-NG",
+        {
+            style: "currency",
+            currency: "NGN"
+        }
+    ).format(amount || 0);
+
+}
+
+
+// LOAD BALANCE AFTER LOGIN
+supabaseClient.auth.onAuthStateChange(
+    (event, session) => {
+
+        if (
+            event === "SIGNED_IN" &&
+            session
+        ) {
+
+            setTimeout(
+                loadVPayBalance,
+                500
+            );
+
+        }
+
+    }
+);
