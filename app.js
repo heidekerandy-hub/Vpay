@@ -1210,3 +1210,593 @@ supabaseClient.auth.onAuthStateChange(
 
     }
 );
+/* ==========================================
+   VPAY TRANSACTION SYSTEM
+   ========================================== */
+
+let transactionType = "income";
+
+
+/* ---------- ELEMENTS ---------- */
+
+const addMoneyBtn =
+    document.getElementById("addMoneyBtn");
+
+const addExpenseBtn =
+    document.getElementById("addExpenseBtn");
+
+const quickAddMoney =
+    document.getElementById("quickAddMoney");
+
+const quickAddExpense =
+    document.getElementById("quickAddExpense");
+
+const transactionModal =
+    document.getElementById("transactionModal");
+
+const closeModal =
+    document.getElementById("closeModal");
+
+const modalTitle =
+    document.getElementById("modalTitle");
+
+const modalDescription =
+    document.getElementById("modalDescription");
+
+const transactionAmount =
+    document.getElementById("transactionAmount");
+
+const transactionDescription =
+    document.getElementById("transactionDescription");
+
+const saveTransaction =
+    document.getElementById("saveTransaction");
+
+const transactionMessage =
+    document.getElementById("transactionMessage");
+
+
+/* ---------- OPEN ADD MONEY ---------- */
+
+function openAddMoney() {
+
+    transactionType = "income";
+
+    modalTitle.textContent =
+        "Add Money";
+
+    modalDescription.textContent =
+        "Record money received.";
+
+    transactionAmount.value = "";
+
+    transactionDescription.value = "";
+
+    transactionMessage.textContent = "";
+
+    transactionModal.classList.remove("hidden");
+
+}
+
+
+/* ---------- OPEN ADD EXPENSE ---------- */
+
+function openAddExpense() {
+
+    transactionType = "expense";
+
+    modalTitle.textContent =
+        "Add Expense";
+
+    modalDescription.textContent =
+        "Record money you spent.";
+
+    transactionAmount.value = "";
+
+    transactionDescription.value = "";
+
+    transactionMessage.textContent = "";
+
+    transactionModal.classList.remove("hidden");
+
+}
+
+
+/* ---------- BUTTON EVENTS ---------- */
+
+if (addMoneyBtn) {
+
+    addMoneyBtn.addEventListener(
+        "click",
+        openAddMoney
+    );
+
+}
+
+
+if (addExpenseBtn) {
+
+    addExpenseBtn.addEventListener(
+        "click",
+        openAddExpense
+    );
+
+}
+
+
+if (quickAddMoney) {
+
+    quickAddMoney.addEventListener(
+        "click",
+        openAddMoney
+    );
+
+}
+
+
+if (quickAddExpense) {
+
+    quickAddExpense.addEventListener(
+        "click",
+        openAddExpense
+    );
+
+}
+
+
+/* ---------- CLOSE MODAL ---------- */
+
+if (closeModal) {
+
+    closeModal.addEventListener(
+        "click",
+        function () {
+
+            transactionModal.classList.add(
+                "hidden"
+            );
+
+        }
+    );
+
+}
+
+
+/* ---------- SAVE TRANSACTION ---------- */
+
+if (saveTransaction) {
+
+    saveTransaction.addEventListener(
+        "click",
+        async function () {
+
+            const amount =
+                Number(
+                    transactionAmount.value
+                );
+
+            const description =
+                transactionDescription.value.trim();
+
+
+            transactionMessage.textContent = "";
+
+
+            /* VALIDATE */
+
+            if (!amount || amount <= 0) {
+
+                transactionMessage.textContent =
+                    "Please enter a valid amount.";
+
+                return;
+
+            }
+
+
+            saveTransaction.disabled = true;
+
+            saveTransaction.textContent =
+                "Saving...";
+
+
+            /* GET CURRENT USER */
+
+            const {
+                data: {
+                    user
+                }
+            } =
+                await supabaseClient.auth.getUser();
+
+
+            if (!user) {
+
+                transactionMessage.textContent =
+                    "Please log in again.";
+
+                saveTransaction.disabled = false;
+
+                saveTransaction.textContent =
+                    "Save Transaction";
+
+                return;
+
+            }
+
+
+            /* SAVE TO SUPABASE */
+
+            const { error } =
+                await supabaseClient
+                    .from("transactions")
+                    .insert({
+
+                        user_id: user.id,
+
+                        amount: amount,
+
+                        type: transactionType,
+
+                        description:
+                            description ||
+                            (
+                                transactionType ===
+                                "income"
+                                    ? "Money received"
+                                    : "Expense"
+                            )
+
+                    });
+
+
+            /* ERROR */
+
+            if (error) {
+
+                console.error(
+                    "Transaction error:",
+                    error
+                );
+
+                transactionMessage.textContent =
+                    error.message;
+
+                saveTransaction.disabled = false;
+
+                saveTransaction.textContent =
+                    "Save Transaction";
+
+                return;
+
+            }
+
+
+            /* SUCCESS */
+
+            transactionMessage.textContent =
+                "Transaction saved successfully!";
+
+
+            saveTransaction.disabled = false;
+
+            saveTransaction.textContent =
+                "Save Transaction";
+
+
+            /* REFRESH */
+
+            await loadTransactions();
+
+
+            /* CLOSE */
+
+            setTimeout(
+                function () {
+
+                    transactionModal.classList.add(
+                        "hidden"
+                    );
+
+                },
+                700
+            );
+
+        }
+    );
+
+}
+
+
+/* ==========================================
+   LOAD TRANSACTIONS
+   ========================================== */
+
+async function loadTransactions() {
+
+    const {
+        data: {
+            user
+        }
+    } =
+        await supabaseClient.auth.getUser();
+
+
+    if (!user) return;
+
+
+    const { data, error } =
+        await supabaseClient
+            .from("transactions")
+            .select("*")
+            .eq("user_id", user.id)
+            .order(
+                "created_at",
+                {
+                    ascending: false
+                }
+            );
+
+
+    if (error) {
+
+        console.error(
+            "Could not load transactions:",
+            error
+        );
+
+        return;
+
+    }
+
+
+    calculateVPayBalance(
+        data || []
+    );
+
+
+    displayVPayTransactions(
+        data || []
+    );
+
+}
+
+
+/* ==========================================
+   CALCULATE BALANCE
+   ========================================== */
+
+function calculateVPayBalance(
+    transactions
+) {
+
+    let income = 0;
+
+    let expenses = 0;
+
+
+    transactions.forEach(
+        function (transaction) {
+
+            const amount =
+                Number(transaction.amount) || 0;
+
+
+            if (
+                transaction.type ===
+                "income"
+            ) {
+
+                income += amount;
+
+            }
+
+
+            if (
+                transaction.type ===
+                "expense"
+            ) {
+
+                expenses += amount;
+
+            }
+
+        }
+    );
+
+
+    const balance =
+        income - expenses;
+
+
+    const balanceElement =
+        document.getElementById(
+            "totalBalance"
+        );
+
+    const incomeElement =
+        document.getElementById(
+            "totalIncome"
+        );
+
+    const expenseElement =
+        document.getElementById(
+            "totalExpenses"
+        );
+
+
+    if (balanceElement) {
+
+        balanceElement.textContent =
+            formatVPayMoney(balance);
+
+    }
+
+
+    if (incomeElement) {
+
+        incomeElement.textContent =
+            formatVPayMoney(income);
+
+    }
+
+
+    if (expenseElement) {
+
+        expenseElement.textContent =
+            formatVPayMoney(expenses);
+
+    }
+
+}
+
+
+/* ==========================================
+   DISPLAY TRANSACTIONS
+   ========================================== */
+
+function displayVPayTransactions(
+    transactions
+) {
+
+    const list =
+        document.getElementById(
+            "transactionList"
+        );
+
+
+    if (!list) return;
+
+
+    if (!transactions.length) {
+
+        list.innerHTML = `
+
+            <div class="empty-state">
+
+                <div class="empty-icon">
+                    💳
+                </div>
+
+                <h3>
+                    No transactions yet
+                </h3>
+
+                <p>
+                    Add your first income or expense.
+                </p>
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    list.innerHTML =
+        transactions
+            .slice(0, 10)
+            .map(
+                function (transaction) {
+
+                    const income =
+                        transaction.type ===
+                        "income";
+
+
+                    const sign =
+                        income ? "+" : "-";
+
+
+                    const icon =
+                        income ? "💰" : "💸";
+
+
+                    const date =
+                        new Date(
+                            transaction.created_at
+                        ).toLocaleDateString(
+                            "en-NG",
+                            {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric"
+                            }
+                        );
+
+
+                    return `
+
+                        <div class="transaction-item">
+
+                            <div class="transaction-icon">
+                                ${icon}
+                            </div>
+
+                            <div class="transaction-info">
+
+                                <strong>
+                                    ${
+                                        transaction.description ||
+                                        (
+                                            income
+                                                ? "Money received"
+                                                : "Expense"
+                                        )
+                                    }
+                                </strong>
+
+                                <small>
+                                    ${date}
+                                </small>
+
+                            </div>
+
+                            <div class="
+                                transaction-amount
+                                ${
+                                    income
+                                        ? "income"
+                                        : "expense"
+                                }
+                            ">
+
+                                ${sign}${formatVPayMoney(
+                                    transaction.amount
+                                )}
+
+                            </div>
+
+                        </div>
+
+                    `;
+
+                }
+            )
+            .join("");
+
+}
+
+
+/* ==========================================
+   FORMAT MONEY
+   ========================================== */
+
+function formatVPayMoney(
+    amount
+) {
+
+    return new Intl.NumberFormat(
+        "en-NG",
+        {
+            style: "currency",
+            currency: "NGN",
+            minimumFractionDigits: 2
+        }
+    ).format(
+        Number(amount) || 0
+    );
+
+}
