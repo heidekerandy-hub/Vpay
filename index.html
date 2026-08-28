@@ -320,44 +320,41 @@
 
                 <!-- ACTION BUTTONS -->
 
-                <div class="bulk-transfer-actions">
+<div class="bulk-transfer-actions">
 
-                   <button
-    id="uploadBulkBtn"
-    class="bulk-primary-btn"
-    type="button"
-    onclick="document.getElementById('bulkFileInput').click()"
+    <button
+        type="button"
+        class="bulk-primary-btn"
+        onclick="document.getElementById('bulkFileInput').click()"
+    >
+        📁 Upload Recipient File
+    </button>
+
+    <button
+        id="manualBulkBtn"
+        type="button"
+        class="bulk-secondary-btn"
+    >
+        ＋ Add Recipient Manually
+    </button>
+
+</div>
+
+<!-- FILE INPUT -->
+
+<input
+    type="file"
+    id="bulkFileInput"
+    accept=".csv,.xlsx,.xls"
+    style="display: none;"
 >
-    📁 Upload Recipient File
 
->
-                    <button
-                        id="manualBulkBtn"
-                        class="bulk-secondary-btn"
-                        type="button"
-                    >
-                        ＋ Add Recipient Manually
-                    </button>
+<!-- FILE STATUS -->
 
-                </div>
-
-
-                <!-- FILE INPUT -->
-
-                <input
-                    type="file"
-                    id="bulkFileInput"
-                    accept=".csv,.xlsx,.xls"
-                    hidden
-                >
-
-
-                <!-- FILE STATUS -->
-
-                <div
-                    id="bulkFileStatus"
-                    class="bulk-file-status hidden"
-                ></div>
+<div
+    id="bulkFileStatus"
+    class="bulk-file-status hidden"
+></div>
 
 
                 <!-- SUMMARY -->
