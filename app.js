@@ -1130,3 +1130,71 @@ checkSession();
 console.log(
     "VPay application loaded successfully"
 );
+/* ==========================================
+   VPAY BULK TRANSFER - FILE UPLOAD
+   ========================================== */
+
+const uploadBulkBtn =
+    document.getElementById("uploadBulkBtn");
+
+const bulkFileInput =
+    document.getElementById("bulkFileInput");
+
+const bulkTransferArea =
+    document.getElementById("bulkTransferArea");
+
+
+if (uploadBulkBtn && bulkFileInput) {
+
+    uploadBulkBtn.addEventListener("click", function () {
+
+        bulkFileInput.click();
+
+    });
+
+}
+
+
+if (bulkFileInput) {
+
+    bulkFileInput.addEventListener("change", function () {
+
+        const file = bulkFileInput.files[0];
+
+        if (!file) return;
+
+        bulkTransferArea.innerHTML = `
+
+            <div class="bulk-file-selected">
+
+                <div class="bulk-file-icon">
+                    📄
+                </div>
+
+                <div>
+
+                    <strong>
+                        ${file.name}
+                    </strong>
+
+                    <p>
+                        File selected successfully.
+                    </p>
+
+                </div>
+
+            </div>
+
+            <button
+                id="processBulkFile"
+                class="bulk-primary-btn"
+                type="button"
+            >
+                🔍 Review Recipients
+            </button>
+
+        `;
+
+    });
+
+}
