@@ -163,7 +163,418 @@
                     </strong>
 
                 </div>
+/* ==========================================
+   VPAY BULK TRANSFER SYSTEM
+   ========================================== */
 
+let bulkRecipients = [];
+
+
+/* ==========================================
+   BULK ELEMENTS
+   ========================================== */
+
+const uploadBulkBtn =
+    document.getElementById("uploadBulkBtn");
+
+const bulkFileInput =
+    document.getElementById("bulkFileInput");
+
+const bulkSummary =
+    document.getElementById("bulkSummary");
+
+const recipientCount =
+    document.getElementById("recipientCount");
+
+const bulkTotalAmount =
+    document.getElementById("bulkTotalAmount");
+
+const recipientTableContainer =
+    document.getElementById(
+        "recipientTableContainer"
+    );
+
+
+/* ==========================================
+   OPEN FILE PICKER
+   ========================================== */
+
+if (uploadBulkBtn && bulkFileInput) {
+
+    uploadBulkBtn.addEventListener(
+        "click",
+        function () {
+
+            bulkFileInput.click();
+
+        }
+    );
+
+}
+
+
+/* ==========================================
+   FILE SELECTED
+   ========================================== */
+
+if (bulkFileInput) {
+
+    bulkFileInput.addEventListener(
+        "change",
+        async function () {
+
+            const file =
+                bulkFileInput.files[0];
+
+            if (!file) return;
+
+
+            try {
+
+                const extension =
+                    file.name
+                        .split(".")
+                        .pop()
+                        .toLowerCase();
+
+
+                if (
+                    extension !== "csv" &&
+                    extension !== "xlsx" &&
+                    extension !== "xls"
+                ) {
+
+                    alert(
+                        "Please upload a CSV or Excel file."
+                    );
+
+                    return;
+
+                }
+
+
+                const data =
+                    await file.arrayBuffer();
+
+
+                let workbook;
+
+
+                if (extension === "csv") {
+
+                    const text =
+                        new TextDecoder()
+                            .decode(data);
+
+                    workbook =
+                        XLSX.read(
+                            text,
+                            {
+                                type: "string"
+                            }
+                        );
+
+                } else {
+
+                    workbook =
+                        XLSX.read(
+                            data,
+                            {
+                                type: "array"
+                            }
+                        );
+
+                }
+
+
+                const firstSheet =
+                    workbook.Sheets[
+                        workbook.SheetNames[0]
+                    ];
+
+
+                const rows =
+                    XLSX.utils.sheet_to_json(
+                        firstSheet,
+                        {
+                            defval: ""
+                        }
+                    );
+
+
+                if (!rows.length) {
+
+                    alert(
+                        "The uploaded file is empty."
+                    );
+
+                    return;
+
+                }
+
+
+                bulkRecipients =
+                    rows
+                        .map(function (row) {
+
+                            return {
+
+                                name:
+                                    row.Name ||
+                                    row.name ||
+                                    row["Recipient Name"] ||
+                                    "",
+
+                                accountNumber:
+                                    row["Account Number"] ||
+                                    row.accountNumber ||
+                                    row.AccountNumber ||
+                                    "",
+
+                                bank:
+                                    row.Bank ||
+                                    row.bank ||
+                                    "",
+
+                                amount:
+                                    Number(
+                                        row.Amount ||
+                                        row.amount ||
+                                        0
+                                    )
+
+                            };
+
+                        })
+                        .filter(function (recipient) {
+
+                            return (
+                                recipient.name ||
+                                recipient.accountNumber
+                            ) &&
+                            recipient.amount > 0;
+
+                        });
+
+
+                if (!bulkRecipients.length) {
+
+                    alert(
+                        "No valid recipients were found. Make sure your file contains Name, Account Number, Bank and Amount columns."
+                    );
+
+                    return;
+
+                }
+
+
+                renderBulkRecipients();
+
+
+            } catch (error) {
+
+                console.error(
+                    "Bulk upload error:",
+                    error
+                );
+
+                alert(
+                    "Unable to read this file."
+                );
+
+            }
+
+        }
+    );
+
+}
+
+
+/* ==========================================
+   RENDER RECIPIENTS
+   ========================================== */
+
+function renderBulkRecipients() {
+
+    if (!recipientTableContainer) return;
+
+
+    const count =
+        bulkRecipients.length;
+
+
+    const total =
+        bulkRecipients.reduce(
+            function (sum, recipient) {
+
+                return sum +
+                    Number(recipient.amount || 0);
+
+            },
+            0
+        );
+
+
+    if (bulkSummary) {
+
+        bulkSummary.classList.remove(
+            "hidden"
+        );
+
+    }
+
+
+    if (recipientCount) {
+
+        recipientCount.textContent =
+            count;
+
+    }
+
+
+    if (bulkTotalAmount) {
+
+        bulkTotalAmount.textContent =
+            formatMoney(total);
+
+    }
+
+
+    recipientTableContainer.innerHTML = `
+
+        <div class="recipient-table-wrapper">
+
+            <table class="recipient-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>#</th>
+
+                        <th>Recipient</th>
+
+                        <th>Account Number</th>
+
+                        <th>Bank</th>
+
+                        <th>Amount</th>
+
+                        <th>Action</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    ${bulkRecipients.map(
+                        function (recipient, index) {
+
+                            return `
+
+                                <tr>
+
+                                    <td>
+                                        ${index + 1}
+                                    </td>
+
+                                    <td>
+                                        <strong>
+                                            ${escapeHTML(
+                                                recipient.name
+                                            )}
+                                        </strong>
+                                    </td>
+
+                                    <td>
+                                        ${escapeHTML(
+                                            String(
+                                                recipient.accountNumber
+                                            )
+                                        )}
+                                    </td>
+
+                                    <td>
+                                        ${escapeHTML(
+                                            recipient.bank
+                                        )}
+                                    </td>
+
+                                    <td>
+                                        <strong>
+                                            ${formatMoney(
+                                                recipient.amount
+                                            )}
+                                        </strong>
+                                    </td>
+
+                                    <td>
+
+                                        <button
+                                            class="remove-recipient-btn"
+                                            type="button"
+                                            onclick="removeBulkRecipient(${index})"
+                                        >
+                                            Remove
+                                        </button>
+
+                                    </td>
+
+                                </tr>
+
+                            `;
+
+                        }
+                    ).join("")}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    `;
+
+}
+
+
+/* ==========================================
+   REMOVE RECIPIENT
+   ========================================== */
+
+function removeBulkRecipient(index) {
+
+    bulkRecipients.splice(
+        index,
+        1
+    );
+
+
+    renderBulkRecipients();
+
+}
+
+
+/* ==========================================
+   ESCAPE HTML
+   ========================================== */
+
+function escapeHTML(value) {
+
+    return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
+
+console.log(
+    "VPay Bulk Transfer System Loaded"
+);
             </section>
 
 
