@@ -2,6 +2,12 @@
 
 /* ==========================================
    VPAY - COMPLETE APP.JS
+   Login + Transactions + Bulk Upload
+   ========================================== */
+
+
+/* ==========================================
+   SUPABASE
    ========================================== */
 
 const SUPABASE_URL =
@@ -18,7 +24,7 @@ const supabaseClient =
 
 
 /* ==========================================
-   VARIABLES
+   STATE
    ========================================== */
 
 let signupMode = false;
@@ -125,6 +131,15 @@ const refreshTransactions =
 const refreshTransactions2 =
     document.getElementById("refreshTransactions2");
 
+const uploadBulkBtn =
+    document.getElementById("uploadBulkBtn");
+
+const bulkFileInput =
+    document.getElementById("bulkFileInput");
+
+const bulkTransferArea =
+    document.getElementById("bulkTransferArea");
+
 
 /* ==========================================
    MONEY FORMAT
@@ -148,135 +163,209 @@ function formatMoney(amount) {
    LOGIN / SIGNUP SWITCH
    ========================================== */
 
-switchAuth.addEventListener(
-    "click",
-    function () {
+if (switchAuth) {
 
-        signupMode = !signupMode;
+    switchAuth.addEventListener(
+        "click",
+        function () {
 
-        authMessage.textContent = "";
+            signupMode = !signupMode;
 
-        if (signupMode) {
+            if (authMessage) {
+                authMessage.textContent = "";
+            }
 
-            authTitle.textContent =
-                "Create your VPay account";
+            if (signupMode) {
 
-            authSubtitle.textContent =
-                "Start managing your money smarter.";
+                authTitle.textContent =
+                    "Create your VPay account";
 
-            nameField.classList.remove("hidden");
+                authSubtitle.textContent =
+                    "Start managing your money smarter.";
 
-            authButton.textContent =
-                "Create Account";
+                nameField.classList.remove(
+                    "hidden"
+                );
 
-            switchText.textContent =
-                "Already have an account?";
+                authButton.textContent =
+                    "Create Account";
 
-            switchAuth.textContent =
-                "Login";
+                switchText.textContent =
+                    "Already have an account?";
 
-        } else {
+                switchAuth.textContent =
+                    "Login";
 
-            authTitle.textContent =
-                "Welcome to VPay";
+            } else {
 
-            authSubtitle.textContent =
-                "Manage your money smarter.";
+                authTitle.textContent =
+                    "Welcome to VPay";
 
-            nameField.classList.add("hidden");
+                authSubtitle.textContent =
+                    "Manage your money smarter.";
 
-            authButton.textContent =
-                "Login";
+                nameField.classList.add(
+                    "hidden"
+                );
 
-            switchText.textContent =
-                "Don't have an account?";
+                authButton.textContent =
+                    "Login";
 
-            switchAuth.textContent =
-                "Create account";
+                switchText.textContent =
+                    "Don't have an account?";
+
+                switchAuth.textContent =
+                    "Create account";
+
+            }
 
         }
+    );
 
-    }
-);
+}
 
 
 /* ==========================================
    LOGIN / SIGNUP
    ========================================== */
 
-authButton.addEventListener(
-    "click",
-    async function () {
+if (authButton) {
 
-        const userEmail =
-            email.value.trim();
+    authButton.addEventListener(
+        "click",
+        async function () {
 
-        const userPassword =
-            password.value;
+            const userEmail =
+                email.value.trim();
 
-        const name =
-            fullName.value.trim();
+            const userPassword =
+                password.value;
 
-
-        authMessage.textContent = "";
-
-
-        if (!userEmail || !userPassword) {
-
-            authMessage.textContent =
-                "Please enter your email and password.";
-
-            return;
-
-        }
+            const name =
+                fullName.value.trim();
 
 
-        /* ==============================
-           SIGN UP
-           ============================== */
+            authMessage.textContent = "";
 
-        if (signupMode) {
 
-            if (!name) {
+            if (!userEmail || !userPassword) {
 
                 authMessage.textContent =
-                    "Please enter your full name.";
+                    "Please enter your email and password.";
 
                 return;
 
             }
 
 
-            if (userPassword.length < 6) {
+            /* ==========================
+               SIGN UP
+               ========================== */
+
+            if (signupMode) {
+
+                if (!name) {
+
+                    authMessage.textContent =
+                        "Please enter your full name.";
+
+                    return;
+
+                }
+
+
+                if (userPassword.length < 6) {
+
+                    authMessage.textContent =
+                        "Password must be at least 6 characters.";
+
+                    return;
+
+                }
+
+
+                authButton.disabled = true;
 
                 authMessage.textContent =
-                    "Password must be at least 6 characters.";
+                    "Creating your account...";
+
+
+                const {
+                    data,
+                    error
+                } =
+                    await supabaseClient.auth.signUp({
+
+                        email: userEmail,
+
+                        password: userPassword,
+
+                        options: {
+
+                            data: {
+                                full_name: name
+                            }
+
+                        }
+
+                    });
+
+
+                authButton.disabled = false;
+
+
+                if (error) {
+
+                    authMessage.textContent =
+                        error.message;
+
+                    return;
+
+                }
+
+
+                if (data.session) {
+
+                    await createProfile(
+                        data.user,
+                        name
+                    );
+
+                    await showDashboard(
+                        data.user
+                    );
+
+                } else {
+
+                    authMessage.textContent =
+                        "Account created successfully. Check your email if confirmation is required.";
+
+                }
 
                 return;
 
             }
 
+
+            /* ==========================
+               LOGIN
+               ========================== */
 
             authButton.disabled = true;
 
             authMessage.textContent =
-                "Creating your account...";
+                "Logging in...";
 
 
-            const { data, error } =
-                await supabaseClient.auth.signUp({
+            const {
+                data,
+                error
+            } =
+                await supabaseClient.auth.signInWithPassword({
 
                     email: userEmail,
 
-                    password: userPassword,
-
-                    options: {
-
-                        data: {
-                            full_name: name
-                        }
-
-                    }
+                    password: userPassword
 
                 });
 
@@ -294,68 +383,14 @@ authButton.addEventListener(
             }
 
 
-            if (data.session) {
-
-                await createProfile(
-                    data.user,
-                    name
-                );
-
-                await showDashboard(
-                    data.user
-                );
-
-            } else {
-
-                authMessage.textContent =
-                    "Account created successfully. Check your email if confirmation is required.";
-
-            }
-
-            return;
+            await showDashboard(
+                data.user
+            );
 
         }
+    );
 
-
-        /* ==============================
-           LOGIN
-           ============================== */
-
-        authButton.disabled = true;
-
-        authMessage.textContent =
-            "Logging in...";
-
-
-        const { data, error } =
-            await supabaseClient.auth.signInWithPassword({
-
-                email: userEmail,
-
-                password: userPassword
-
-            });
-
-
-        authButton.disabled = false;
-
-
-        if (error) {
-
-            authMessage.textContent =
-                error.message;
-
-            return;
-
-        }
-
-
-        await showDashboard(
-            data.user
-        );
-
-    }
-);
+}
 
 
 /* ==========================================
@@ -387,7 +422,7 @@ async function createProfile(
 
     if (error) {
 
-        console.log(
+        console.error(
             "Profile error:",
             error.message
         );
@@ -421,7 +456,9 @@ async function showDashboard(user) {
 
     if (!name) {
 
-        const { data } =
+        const {
+            data
+        } =
             await supabaseClient
                 .from("profiles")
                 .select("full_name")
@@ -476,6 +513,7 @@ function openAddMoney() {
         "hidden"
     );
 
+
     setTimeout(
         function () {
 
@@ -516,6 +554,7 @@ function openAddExpense() {
         "hidden"
     );
 
+
     setTimeout(
         function () {
 
@@ -529,7 +568,7 @@ function openAddExpense() {
 
 
 /* ==========================================
-   BUTTON EVENTS
+   BUTTONS
    ========================================== */
 
 if (addMoneyBtn) {
@@ -542,21 +581,21 @@ if (addMoneyBtn) {
 }
 
 
-if (quickAddMoney) {
-
-    quickAddMoney.addEventListener(
-        "click",
-        openAddMoney
-    );
-
-}
-
-
 if (addExpenseBtn) {
 
     addExpenseBtn.addEventListener(
         "click",
         openAddExpense
+    );
+
+}
+
+
+if (quickAddMoney) {
+
+    quickAddMoney.addEventListener(
+        "click",
+        openAddMoney
     );
 
 }
@@ -576,59 +615,42 @@ if (quickAddExpense) {
    CLOSE MODAL
    ========================================== */
 
-if (closeModal && transactionModal) {
+if (closeModal) {
 
-    closeModal.onclick = function () {
-
-        transactionModal.classList.add("hidden");
-
-        transactionMessage.textContent = "";
-
-        transactionAmount.value = "";
-
-        transactionDescription.value = "";
-
-    };
-
-}
-document.addEventListener("keydown", function (event) {
-
-    if (
-        event.key === "Escape" &&
-        transactionModal &&
-        !transactionModal.classList.contains("hidden")
-    ) {
-
-        transactionModal.classList.add("hidden");
-
-    }
-
-});
-/* ==========================================
-   CLOSE MODAL WHEN CLICKING OUTSIDE
-   ========================================== */
-
-if (transactionModal) {
-
-    transactionModal.addEventListener(
+    closeModal.addEventListener(
         "click",
-        function (event) {
+        function () {
 
-            if (
-                event.target ===
-                transactionModal
-            ) {
-
-                transactionModal.classList.add(
-                    "hidden"
-                );
-
-            }
+            transactionModal.classList.add(
+                "hidden"
+            );
 
         }
     );
 
 }
+
+
+document.addEventListener(
+    "keydown",
+    function (event) {
+
+        if (
+            event.key === "Escape" &&
+            transactionModal &&
+            !transactionModal.classList.contains(
+                "hidden"
+            )
+        ) {
+
+            transactionModal.classList.add(
+                "hidden"
+            );
+
+        }
+
+    }
+);
 
 
 /* ==========================================
@@ -654,10 +676,7 @@ if (saveTransaction) {
                 "";
 
 
-            if (
-                !amount ||
-                amount <= 0
-            ) {
+            if (!amount || amount <= 0) {
 
                 transactionMessage.textContent =
                     "Please enter a valid amount.";
@@ -693,7 +712,9 @@ if (saveTransaction) {
                 }
 
 
-                const { error } =
+                const {
+                    error
+                } =
                     await supabaseClient
                         .from("transactions")
                         .insert({
@@ -795,10 +816,7 @@ async function loadTransactions() {
         await supabaseClient
             .from("transactions")
             .select("*")
-            .eq(
-                "user_id",
-                user.id
-            )
+            .eq("user_id", user.id)
             .order(
                 "created_at",
                 {
@@ -810,8 +828,8 @@ async function loadTransactions() {
     if (error) {
 
         console.error(
-            "Transaction loading error:",
-            error.message
+            "Could not load transactions:",
+            error
         );
 
         return;
@@ -935,19 +953,19 @@ function displayTransactions(
             .map(
                 function (transaction) {
 
-                    const isIncome =
+                    const income =
                         transaction.type ===
                         "income";
 
 
                     const sign =
-                        isIncome
+                        income
                             ? "+"
                             : "-";
 
 
                     const icon =
-                        isIncome
+                        income
                             ? "💰"
                             : "💸";
 
@@ -979,7 +997,7 @@ function displayTransactions(
                                     ${
                                         transaction.description ||
                                         (
-                                            isIncome
+                                            income
                                                 ? "Money received"
                                                 : "Expense"
                                         )
@@ -992,11 +1010,14 @@ function displayTransactions(
 
                             </div>
 
-                            <div class="transaction-amount ${
-                                isIncome
-                                    ? "income"
-                                    : "expense"
-                            }">
+                            <div class="
+                                transaction-amount
+                                ${
+                                    income
+                                        ? "income"
+                                        : "expense"
+                                }
+                            ">
 
                                 ${sign}${formatMoney(
                                     transaction.amount
@@ -1072,7 +1093,381 @@ if (logoutButton) {
 
 
 /* ==========================================
-   CHECK EXISTING SESSION
+   BULK TRANSFER
+   ========================================== */
+
+/*
+   The upload button itself is controlled
+   by the onclick in index.html.
+
+   This section reads the selected file.
+*/
+
+
+if (bulkFileInput) {
+
+    bulkFileInput.addEventListener(
+        "change",
+        async function () {
+
+            const file =
+                bulkFileInput.files[0];
+
+
+            if (!file) return;
+
+
+            bulkTransferArea.innerHTML = `
+
+                <div class="bulk-file-selected">
+
+                    <div class="bulk-file-icon">
+                        📄
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            ${file.name}
+                        </strong>
+
+                        <p>
+                            Reading recipient information...
+                        </p>
+
+                    </div>
+
+                </div>
+
+            `;
+
+
+            try {
+
+                if (
+                    typeof XLSX ===
+                    "undefined"
+                ) {
+
+                    throw new Error(
+                        "Excel reader is not loaded. Please refresh the page."
+                    );
+
+                }
+
+
+                const arrayBuffer =
+                    await file.arrayBuffer();
+
+
+                const workbook =
+                    XLSX.read(
+                        arrayBuffer,
+                        {
+                            type: "array"
+                        }
+                    );
+
+
+                const firstSheet =
+                    workbook.Sheets[
+                        workbook.SheetNames[0]
+                    ];
+
+
+                const rows =
+                    XLSX.utils.sheet_to_json(
+                        firstSheet,
+                        {
+                            defval: ""
+                        }
+                    );
+
+
+                if (!rows.length) {
+
+                    bulkTransferArea.innerHTML = `
+
+                        <div class="empty-state">
+
+                            <div class="empty-icon">
+                                📄
+                            </div>
+
+                            <h3>
+                                File is empty
+                            </h3>
+
+                            <p>
+                                Please upload a file containing recipients.
+                            </p>
+
+                        </div>
+
+                    `;
+
+                    return;
+
+                }
+
+
+                displayBulkRecipients(
+                    rows
+                );
+
+
+            } catch (error) {
+
+                console.error(
+                    "Bulk file error:",
+                    error
+                );
+
+
+                bulkTransferArea.innerHTML = `
+
+                    <div class="empty-state">
+
+                        <div class="empty-icon">
+                            ⚠️
+                        </div>
+
+                        <h3>
+                            Unable to read file
+                        </h3>
+
+                        <p>
+                            ${error.message}
+                        </p>
+
+                    </div>
+
+                `;
+
+            }
+
+        }
+    );
+
+}
+
+
+/* ==========================================
+   DISPLAY BULK RECIPIENTS
+   ========================================== */
+
+function displayBulkRecipients(
+    rows
+) {
+
+    const columns =
+        Object.keys(rows[0]);
+
+
+    const total =
+        rows.reduce(
+            function (
+                sum,
+                row
+            ) {
+
+                const amount =
+                    Number(
+                        row.amount ||
+                        row.Amount ||
+                        0
+                    );
+
+
+                return sum + amount;
+
+            },
+            0
+        );
+
+
+    let html = `
+
+        <div class="bulk-summary">
+
+            <div>
+                <span>Recipients</span>
+                <strong>
+                    ${rows.length}
+                </strong>
+            </div>
+
+            <div>
+                <span>Total Amount</span>
+                <strong>
+                    ${formatMoney(total)}
+                </strong>
+            </div>
+
+        </div>
+
+
+        <div class="bulk-table-wrapper">
+
+            <table class="bulk-table">
+
+                <thead>
+
+                    <tr>
+    `;
+
+
+    columns.forEach(
+        function (column) {
+
+            html += `
+                <th>
+                    ${column}
+                </th>
+            `;
+
+        }
+    );
+
+
+    html += `
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+    `;
+
+
+    rows.forEach(
+        function (row) {
+
+            html += `<tr>`;
+
+
+            columns.forEach(
+                function (column) {
+
+                    html += `
+                        <td>
+                            ${row[column] || ""}
+                        </td>
+                    `;
+
+                }
+            );
+
+
+            html += `</tr>`;
+
+        }
+    );
+
+
+    html += `
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <div class="bulk-review-actions">
+
+            <button
+                id="removeBulkFile"
+                class="bulk-secondary-btn"
+                type="button"
+            >
+                ✕ Remove File
+            </button>
+
+            <button
+                id="continueBulkTransfer"
+                class="bulk-primary-btn"
+                type="button"
+            >
+                Continue to Review →
+            </button>
+
+        </div>
+
+    `;
+
+
+    bulkTransferArea.innerHTML =
+        html;
+
+
+    const removeBulkFile =
+        document.getElementById(
+            "removeBulkFile"
+        );
+
+
+    if (removeBulkFile) {
+
+        removeBulkFile.addEventListener(
+            "click",
+            function () {
+
+                bulkFileInput.value = "";
+
+                bulkTransferArea.innerHTML = `
+
+                    <div class="bulk-empty-state">
+
+                        <div class="bulk-empty-icon">
+                            📄
+                        </div>
+
+                        <h3>
+                            No recipient list yet
+                        </h3>
+
+                        <p>
+                            Upload an Excel or CSV file containing your recipients to start a bulk transfer.
+                        </p>
+
+                    </div>
+
+                `;
+
+            }
+        );
+
+    }
+
+
+    const continueBulkTransfer =
+        document.getElementById(
+            "continueBulkTransfer"
+        );
+
+
+    if (continueBulkTransfer) {
+
+        continueBulkTransfer.addEventListener(
+            "click",
+            function () {
+
+                alert(
+                    "Recipient review is ready. Bank transfer processing will be connected next."
+                );
+
+            }
+        );
+
+    }
+
+}
+
+
+/* ==========================================
+   AUTH SESSION
    ========================================== */
 
 async function checkSession() {
@@ -1096,12 +1491,8 @@ async function checkSession() {
 }
 
 
-/* ==========================================
-   AUTH STATE
-   ========================================== */
-
 supabaseClient.auth.onAuthStateChange(
-    async function (
+    function (
         event,
         session
     ) {
@@ -1111,7 +1502,7 @@ supabaseClient.auth.onAuthStateChange(
             session
         ) {
 
-            await showDashboard(
+            showDashboard(
                 session.user
             );
 
@@ -1122,279 +1513,12 @@ supabaseClient.auth.onAuthStateChange(
 
 
 /* ==========================================
-   START APP
+   START
    ========================================== */
 
 checkSession();
 
+
 console.log(
-    "VPay application loaded successfully"
+    "VPay complete app loaded successfully."
 );
-/* ==========================================
-   VPAY BULK TRANSFER - FILE UPLOAD
-   ========================================== */
-
-const uploadBulkBtn =
-    document.getElementById("uploadBulkBtn");
-
-const bulkFileInput =
-    document.getElementById("bulkFileInput");
-
-const bulkTransferArea =
-    document.getElementById("bulkTransferArea");
-
-
-if (uploadBulkBtn && bulkFileInput) {
-
-    uploadBulkBtn.addEventListener("click", function () {
-
-        bulkFileInput.click();
-
-    });
-
-}
-
-
-if (bulkFileInput) {
-
-    bulkFileInput.addEventListener("change", function () {
-
-        const file = bulkFileInput.files[0];
-
-        if (!file) return;
-
-        bulkTransferArea.innerHTML = `
-
-            <div class="bulk-file-selected">
-
-                <div class="bulk-file-icon">
-                    📄
-                </div>
-
-                <div>
-
-                    <strong>
-                        ${file.name}
-                    </strong>
-
-                    <p>
-                        File selected successfully.
-                    </p>
-
-                </div>
-
-            </div>
-
-            <button
-                id="processBulkFile"
-                class="bulk-primary-btn"
-                type="button"
-            >
-                🔍 Review Recipients
-            </button>
-
-        `;
-
-    });
-
-}
-/* ==========================================
-   VPAY BULK TRANSFER FILE READER
-   ========================================== */
-
-const bulkFileInput =
-    document.getElementById("bulkFileInput");
-
-const bulkTransferArea =
-    document.getElementById("bulkTransferArea");
-
-
-if (bulkFileInput) {
-
-    bulkFileInput.addEventListener("change", async function () {
-
-        const file = this.files[0];
-
-        if (!file) return;
-
-        bulkTransferArea.innerHTML = `
-            <div class="bulk-file-selected">
-                <div class="bulk-file-icon">📄</div>
-
-                <div>
-                    <strong>${file.name}</strong>
-                    <p>Reading recipient information...</p>
-                </div>
-            </div>
-        `;
-
-        try {
-
-            const arrayBuffer =
-                await file.arrayBuffer();
-
-            const workbook =
-                XLSX.read(arrayBuffer, {
-                    type: "array"
-                });
-
-            const firstSheet =
-                workbook.Sheets[
-                    workbook.SheetNames[0]
-                ];
-
-            const rows =
-                XLSX.utils.sheet_to_json(
-                    firstSheet,
-                    {
-                        defval: ""
-                    }
-                );
-
-            if (!rows.length) {
-
-                bulkTransferArea.innerHTML = `
-                    <div class="empty-state">
-                        <h3>File is empty</h3>
-                        <p>Please upload a file containing recipients.</p>
-                    </div>
-                `;
-
-                return;
-
-            }
-
-            displayBulkRecipients(rows);
-
-        } catch (error) {
-
-            console.error(
-                "Bulk file error:",
-                error
-            );
-
-            bulkTransferArea.innerHTML = `
-                <div class="empty-state">
-                    <h3>Unable to read file</h3>
-                    <p>Please check your Excel or CSV file.</p>
-                </div>
-            `;
-
-        }
-
-    });
-
-}
-
-
-/* ==========================================
-   DISPLAY RECIPIENTS
-   ========================================== */
-
-function displayBulkRecipients(rows) {
-
-    const columns =
-        Object.keys(rows[0]);
-
-    const total =
-        rows.reduce(
-            function (sum, row) {
-
-                const amount =
-                    Number(
-                        row.amount ||
-                        row.Amount ||
-                        0
-                    );
-
-                return sum + amount;
-
-            },
-            0
-        );
-
-
-    let tableHTML = `
-
-        <div class="bulk-summary">
-
-            <div>
-                <span>Recipients</span>
-                <strong>${rows.length}</strong>
-            </div>
-
-            <div>
-                <span>Total Amount</span>
-                <strong>
-                    ${formatVPayMoney(total)}
-                </strong>
-            </div>
-
-        </div>
-
-        <div class="bulk-table-wrapper">
-
-            <table class="bulk-table">
-
-                <thead>
-                    <tr>
-    `;
-
-
-    columns.forEach(function (column) {
-
-        tableHTML += `
-            <th>${column}</th>
-        `;
-
-    });
-
-
-    tableHTML += `
-                    </tr>
-                </thead>
-
-                <tbody>
-    `;
-
-
-    rows.forEach(function (row) {
-
-        tableHTML += `<tr>`;
-
-        columns.forEach(function (column) {
-
-            tableHTML += `
-                <td>${row[column] || ""}</td>
-            `;
-
-        });
-
-        tableHTML += `</tr>`;
-
-    });
-
-
-    tableHTML += `
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-        <button
-            id="continueBulkTransfer"
-            class="bulk-primary-btn"
-            type="button"
-        >
-            Continue to Review →
-        </button>
-
-    `;
-
-
-    bulkTransferArea.innerHTML =
-        tableHTML;
-
-}
