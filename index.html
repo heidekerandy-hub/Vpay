@@ -2,35 +2,57 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>VPay</title>
 
-    <link rel="stylesheet" href="style.css">
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
 </head>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
 <body>
 
-    <!-- AUTH SCREEN -->
+    <!-- ==============================
+         AUTH SCREEN
+         ============================== -->
 
-    <div id="authScreen" class="auth-container">
+    <div
+        id="authScreen"
+        class="auth-container"
+    >
 
         <div class="auth-card">
 
-            <div class="auth-logo">VPay</div>
+            <div class="auth-logo">
+                VPay
+            </div>
 
-            <h1 id="authTitle">Welcome to VPay</h1>
+            <h1 id="authTitle">
+                Welcome to VPay
+            </h1>
 
             <p id="authSubtitle">
                 Manage your money smarter.
             </p>
 
-            <div id="nameField" class="input-group hidden">
 
-                <label>Full Name</label>
+            <div
+                id="nameField"
+                class="input-group hidden"
+            >
+
+                <label>
+                    Full Name
+                </label>
 
                 <input
                     type="text"
@@ -40,9 +62,12 @@
 
             </div>
 
+
             <div class="input-group">
 
-                <label>Email</label>
+                <label>
+                    Email
+                </label>
 
                 <input
                     type="email"
@@ -52,9 +77,12 @@
 
             </div>
 
+
             <div class="input-group">
 
-                <label>Password</label>
+                <label>
+                    Password
+                </label>
 
                 <input
                     type="password"
@@ -64,11 +92,21 @@
 
             </div>
 
-            <button id="authButton" class="primary-btn">
+
+            <button
+                id="authButton"
+                class="primary-btn"
+                type="button"
+            >
                 Login
             </button>
 
-            <p id="authMessage" class="auth-message"></p>
+
+            <p
+                id="authMessage"
+                class="auth-message"
+            ></p>
+
 
             <p class="switch-auth">
 
@@ -76,7 +114,10 @@
                     Don't have an account?
                 </span>
 
-                <button id="switchAuth">
+                <button
+                    id="switchAuth"
+                    type="button"
+                >
                     Create account
                 </button>
 
@@ -87,15 +128,26 @@
     </div>
 
 
-    <!-- DASHBOARD -->
+    <!-- ==============================
+         DASHBOARD
+         ============================== -->
 
-    <div id="dashboard" class="hidden">
+    <div
+        id="dashboard"
+        class="hidden"
+    >
 
         <header class="topbar">
 
-            <div class="logo">VPay</div>
+            <div class="logo">
+                VPay
+            </div>
 
-            <button id="logoutButton" class="logout-btn">
+            <button
+                id="logoutButton"
+                class="logout-btn"
+                type="button"
+            >
                 Logout
             </button>
 
@@ -104,9 +156,14 @@
 
         <main class="container">
 
+
+            <!-- WELCOME -->
+
             <section class="welcome">
 
-                <p>Welcome back</p>
+                <p>
+                    Welcome back
+                </p>
 
                 <h1 id="userName">
                     VPay User
@@ -119,19 +176,28 @@
 
             <section class="balance-card">
 
-                <p>Available Balance</p>
+                <p>
+                    Available Balance
+                </p>
 
                 <h2 id="totalBalance">
                     ₦0.00
                 </h2>
 
+
                 <div class="balance-actions">
 
-                    <button id="addMoneyBtn">
+                    <button
+                        id="addMoneyBtn"
+                        type="button"
+                    >
                         ＋ Add Money
                     </button>
 
-                    <button id="addExpenseBtn">
+                    <button
+                        id="addExpenseBtn"
+                        type="button"
+                    >
                         − Add Expense
                     </button>
 
@@ -144,9 +210,13 @@
 
             <section class="overview">
 
-                <div class="overview-card income-card">
+                <div
+                    class="overview-card income-card"
+                >
 
-                    <span>Income</span>
+                    <span>
+                        Income
+                    </span>
 
                     <strong id="totalIncome">
                         ₦0.00
@@ -154,9 +224,14 @@
 
                 </div>
 
-                <div class="overview-card expense-card">
 
-                    <span>Expenses</span>
+                <div
+                    class="overview-card expense-card"
+                >
+
+                    <span>
+                        Expenses
+                    </span>
 
                     <strong id="totalExpenses">
                         ₦0.00
@@ -171,190 +246,298 @@
 
             <section class="quick-actions">
 
-                <h2>Quick Actions</h2>
+                <h2>
+                    Quick Actions
+                </h2>
 
                 <div class="action-grid">
 
-                    <button id="quickAddMoney">
+                    <button
+                        id="quickAddMoney"
+                        type="button"
+                    >
                         💰 Add Money
                     </button>
 
-                    <button id="quickAddExpense">
+                    <button
+                        id="quickAddExpense"
+                        type="button"
+                    >
                         💸 Add Expense
                     </button>
 
-                    <button id="refreshTransactions">
+                    <button
+                        id="refreshTransactions"
+                        type="button"
+                    >
                         🔄 Refresh
                     </button>
 
-                    <button id="savingsButton">
+                    <button
+                        id="savingsButton"
+                        type="button"
+                    >
                         🎯 Savings Goal
                     </button>
 
                 </div>
 
             </section>
-<!-- ==========================================
-     BULK TRANSFER
-     ========================================== -->
 
-<section class="bulk-transfer-card">
 
-    <div class="bulk-transfer-header">
+            <!-- ==============================
+                 BULK TRANSFER
+                 ============================== -->
 
-        <div>
-            <span class="section-label">PAYMENTS</span>
+            <section class="bulk-transfer-card">
 
-            <h2>Bulk Transfer</h2>
+                <div class="bulk-transfer-header">
+
+                    <div>
+
+                        <span class="section-label">
+                            PAYMENTS
+                        </span>
+
+                        <h2>
+                            Bulk Transfer
+                        </h2>
+
+                        <p>
+                            Send money to multiple
+                            recipients at once.
+                        </p>
+
+                    </div>
+
+
+                    <div class="bulk-transfer-icon">
+                        💸
+                    </div>
+
+                </div>
+
+
+                <!-- ACTION BUTTONS -->
+
+                <div class="bulk-transfer-actions">
+
+                    <button
+                        id="uploadBulkBtn"
+                        class="bulk-primary-btn"
+                        type="button"
+                    >
+                        📁 Upload Recipient File
+                    </button>
+
+
+                    <button
+                        id="manualBulkBtn"
+                        class="bulk-secondary-btn"
+                        type="button"
+                    >
+                        ＋ Add Recipient Manually
+                    </button>
+
+                </div>
+
+
+                <!-- FILE INPUT -->
+
+                <input
+                    type="file"
+                    id="bulkFileInput"
+                    accept=".csv,.xlsx,.xls"
+                    hidden
+                >
+
+
+                <!-- FILE STATUS -->
+
+                <div
+                    id="bulkFileStatus"
+                    class="bulk-file-status hidden"
+                ></div>
+
+
+                <!-- SUMMARY -->
+
+                <div
+                    id="bulkSummary"
+                    class="bulk-summary hidden"
+                >
+
+                    <div>
+
+                        <span>
+                            Recipients
+                        </span>
+
+                        <strong id="recipientCount">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Total Transfer
+                        </span>
+
+                        <strong id="bulkTotalAmount">
+                            ₦0.00
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <!-- RECIPIENT TABLE -->
+
+                <div
+                    id="recipientTableContainer"
+                    class="recipient-table-container"
+                >
+
+                    <div class="bulk-empty-state">
+
+                        <div class="bulk-empty-icon">
+                            📄
+                        </div>
+
+                        <h3>
+                            No recipient list yet
+                        </h3>
+
+                        <p>
+                            Upload an Excel or CSV file
+                            containing your recipients
+                            to start a bulk transfer.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <!-- BULK ACTIONS -->
+
+                <div
+                    id="bulkTransferActions"
+                    class="bulk-bottom-actions hidden"
+                >
+
+                    <button
+                        id="clearRecipientsBtn"
+                        class="bulk-danger-btn"
+                        type="button"
+                    >
+                        🗑 Clear All
+                    </button>
+
+
+                    <button
+                        id="processBulkBtn"
+                        class="bulk-transfer-btn"
+                        type="button"
+                    >
+                        💸 Continue to Transfer
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- ==============================
+                 RECENT TRANSACTIONS
+                 ============================== -->
+
+            <section class="transactions">
+
+                <div class="section-header">
+
+                    <h2>
+                        Recent Transactions
+                    </h2>
+
+                    <button
+                        id="refreshTransactions2"
+                        type="button"
+                    >
+                        Refresh
+                    </button>
+
+                </div>
+
+
+                <div
+                    id="transactionList"
+                    class="transaction-list"
+                >
+
+                    <div class="empty-state">
+
+                        <div class="empty-icon">
+                            💳
+                        </div>
+
+                        <h3>
+                            No transactions yet
+                        </h3>
+
+                        <p>
+                            Add your first income
+                            or expense.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </main>
+
+
+        <footer>
 
             <p>
-                Send money to multiple recipients at once.
-            </p>
-        </div>
-
-        <div class="bulk-transfer-icon">
-            💸
-        </div>
-
-    </div>
-
-
-    <!-- ACTION BUTTONS -->
-
-    <div class="bulk-transfer-actions">
-
-        <button
-            id="uploadBulkBtn"
-            class="bulk-primary-btn"
-            type="button"
-        >
-            📁 Upload Recipient File
-        </button>
-
-
-        <button
-            id="manualBulkBtn"
-            class="bulk-secondary-btn"
-            type="button"
-        >
-            ＋ Add Recipient Manually
-        </button>
-
-    </div>
-
-
-    <!-- HIDDEN FILE INPUT -->
-
-    <input
-        type="file"
-        id="bulkFileInput"
-        accept=".csv,.xlsx,.xls"
-        hidden
-    >
-
-
-    <!-- FILE STATUS -->
-
-    <div
-        id="bulkFileStatus"
-        class="bulk-file-status hidden"
-    ></div>
-
-
-    <!-- SUMMARY -->
-
-    <div
-        id="bulkSummary"
-        class="bulk-summary hidden"
-    >
-
-        <div>
-            <span>Recipients</span>
-            <strong id="recipientCount">0</strong>
-        </div>
-
-        <div>
-            <span>Total Transfer</span>
-            <strong id="bulkTotalAmount">
-                ₦0.00
-            </strong>
-        </div>
-
-    </div>
-
-
-    <!-- RECIPIENT TABLE -->
-
-    <div
-        id="recipientTableContainer"
-        class="recipient-table-container"
-    >
-
-        <div class="bulk-empty-state">
-
-            <div class="bulk-empty-icon">
-                📄
-            </div>
-
-            <h3>
-                No recipient list yet
-            </h3>
-
-            <p>
-                Upload an Excel or CSV file containing
-                your recipients to start a bulk transfer.
+                © 2026 VPay
             </p>
 
-        </div>
+        </footer>
 
     </div>
 
 
-    <!-- BULK ACTIONS -->
+    <!-- ==============================
+         TRANSACTION MODAL
+         ============================== -->
 
     <div
-        id="bulkTransferActions"
-        class="bulk-bottom-actions hidden"
+        id="transactionModal"
+        class="modal hidden"
     >
-
-        <button
-            id="clearRecipientsBtn"
-            class="bulk-danger-btn"
-            type="button"
-        >
-            🗑 Clear All
-        </button>
-
-        <button
-            id="processBulkBtn"
-            class="bulk-transfer-btn"
-            type="button"
-        >
-            💸 Continue to Transfer
-        </button>
-
-    </div>
-
-</section>
-
-    <!-- TRANSACTION MODAL -->
-
-    <div id="transactionModal" class="modal hidden">
 
         <div class="modal-card">
 
-          <button
-    id="closeModal"
-    class="close-modal"
-    type="button"
-    onclick="document.getElementById('transactionModal').classList.add('hidden')"
->
+            <button
+                id="closeModal"
+                class="close-modal"
+                type="button"
+            >
                 ×
             </button>
+
 
             <h2 id="modalTitle">
                 Add Money
             </h2>
+
 
             <p id="modalDescription">
                 Record money received.
@@ -363,7 +546,9 @@
 
             <div class="input-group">
 
-                <label>Amount</label>
+                <label>
+                    Amount
+                </label>
 
                 <input
                     type="number"
@@ -378,7 +563,9 @@
 
             <div class="input-group">
 
-                <label>Description</label>
+                <label>
+                    Description
+                </label>
 
                 <input
                     type="text"
@@ -392,9 +579,11 @@
             <button
                 id="saveTransaction"
                 class="primary-btn"
+                type="button"
             >
                 Save Transaction
             </button>
+
 
             <p
                 id="transactionMessage"
@@ -404,15 +593,23 @@
         </div>
 
     </div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
-<script src="app.js"></script>
+    <!-- ==============================
+         JAVASCRIPT LIBRARIES
+         ============================== -->
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+
+    <!-- ==============================
+         VPAY APPLICATION
+         ============================== -->
+
+    <script src="app.js"></script>
 
 </body>
+
 </html>
-
-    
-
-
