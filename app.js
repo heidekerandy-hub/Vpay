@@ -12,7 +12,9 @@ const supabaseClient =
         SUPABASE_PUBLISHABLE_KEY
     );
 
-
+let signupMode = false;
+let transactionType = "income";
+let bulkRecipients = [];
 const authButton =
     document.getElementById("authButton");
 
