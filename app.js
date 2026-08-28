@@ -1522,3 +1522,47 @@ checkSession();
 console.log(
     "VPay complete app loaded successfully."
 );
+/* ==========================================
+   TEST BULK UPLOAD
+   ========================================== */
+
+const uploadBulkBtn =
+    document.getElementById("uploadBulkBtn");
+
+const bulkFileInput =
+    document.getElementById("bulkFileInput");
+
+console.log("Upload button:", uploadBulkBtn);
+console.log("File input:", bulkFileInput);
+
+
+if (uploadBulkBtn && bulkFileInput) {
+
+    uploadBulkBtn.onclick = function () {
+
+        console.log("UPLOAD CLICKED");
+
+        bulkFileInput.click();
+
+    };
+
+
+    bulkFileInput.onchange = function () {
+
+        const file =
+            bulkFileInput.files[0];
+
+        if (!file) return;
+
+        alert(
+            "File selected: " + file.name
+        );
+
+        console.log(
+            "Selected file:",
+            file.name
+        );
+
+    };
+
+}
