@@ -1,4 +1,9 @@
+```javascript
 "use strict";
+
+/* =========================================================
+   VPAY SUPABASE CONFIGURATION
+   ========================================================= */
 
 const SUPABASE_URL =
     "https://kjkxqrjbchnonbncnzni.supabase.co";
@@ -12,9 +17,20 @@ const supabaseClient =
         SUPABASE_PUBLISHABLE_KEY
     );
 
+
+/* =========================================================
+   GLOBAL VARIABLES
+   ========================================================= */
+
 let signupMode = false;
 let transactionType = "income";
 let bulkRecipients = [];
+
+
+/* =========================================================
+   AUTH ELEMENTS
+   ========================================================= */
+
 const authButton =
     document.getElementById("authButton");
 
@@ -36,69 +52,274 @@ const dashboard =
 const userName =
     document.getElementById("userName");
 
+const fullName =
+    document.getElementById("fullName");
 
-authButton.addEventListener("click", async function () {
+const nameField =
+    document.getElementById("nameField");
 
-    const userEmail =
-        email.value.trim();
+const switchAuth =
+    document.getElementById("switchAuth");
 
-    const userPassword =
-        password.value;
+const switchText =
+    document.getElementById("switchText");
 
-    if (!userEmail || !userPassword) {
+const authTitle =
+    document.getElementById("authTitle");
 
-        authMessage.textContent =
-            "Please enter your email and password.";
+const authSubtitle =
+    document.getElementById("authSubtitle");
 
-        return;
+const logoutButton =
+    document.getElementById("logoutButton");
+
+
+/* =========================================================
+   AUTH MESSAGE
+   ========================================================= */
+
+function showAuthMessage(message) {
+
+    if (authMessage) {
+        authMessage.textContent = message;
+    }
+
+}
+
+
+/* =========================================================
+   LOGIN / SIGNUP
+   ========================================================= */
+
+if (authButton) {
+
+    authButton.addEventListener(
+        "click",
+        async function () {
+
+            const userEmail =
+                email.value.trim();
+
+            const userPassword =
+                password.value;
+
+            if (!userEmail || !userPassword) {
+
+                showAuthMessage(
+                    "Please enter your email and password."
+                );
+
+                return;
+            }
+
+
+            if (
+                signupMode &&
+                fullName &&
+                !fullName.value.trim()
+            ) {
+
+                showAuthMessage(
+                    "Please enter your full name."
+                );
+
+                return;
+            }
+
+
+            authButton.disabled = true;
+
+            showAuthMessage(
+                signupMode
+                    ? "Creating account..."
+                    : "Logging in..."
+            );
+
+
+            try {
+
+                /* =========================================
+                   SIGN UP
+                   ========================================= */
+
+                if (signupMode) {
+
+                    const name =
+                        fullName.value.trim();
+
+
+                    const {
+                        data,
+                        error
+                    } =
+                        await supabaseClient.auth.signUp({
+
+                            email: userEmail,
+
+                            password: userPassword,
+
+                            options: {
+
+                                data: {
+
+                                    full_name: name
+
+                                }
+
+                            }
+
+                        });
+
+
+                    if (error) {
+
+                        console.error(
+                            "Signup error:",
+                            error
+                        );
+
+                        showAuthMessage(
+                            error.message
+                        );
+
+                        authButton.disabled = false;
+
+                        return;
+                    }
+
+
+                    /*
+                     Supabase may require email confirmation.
+                    */
+
+                    if (
+                        data.user &&
+                        !data.session
+                    ) {
+
+                        showAuthMessage(
+                            "Account created. Please check your email to confirm your account."
+                        );
+
+                        authButton.disabled = false;
+
+                        return;
+                    }
+
+
+                    if (data.session) {
+
+                        showDashboard(
+                            data.user
+                        );
+
+                    }
+
+                    return;
+                }
+
+
+                /* =========================================
+                   LOGIN
+                   ========================================= */
+
+                const {
+                    data,
+                    error
+                } =
+                    await supabaseClient.auth.signInWithPassword({
+
+                        email: userEmail,
+
+                        password: userPassword
+
+                    });
+
+
+                if (error) {
+
+                    console.error(
+                        "Login error:",
+                        error
+                    );
+
+                    showAuthMessage(
+                        error.message
+                    );
+
+                    authButton.disabled = false;
+
+                    return;
+                }
+
+
+                if (
+                    data &&
+                    data.user
+                ) {
+
+                    showDashboard(
+                        data.user
+                    );
+
+                }
+
+
+            } catch (error) {
+
+                console.error(
+                    "Authentication error:",
+                    error
+                );
+
+                showAuthMessage(
+                    "Unable to connect to VPay. Please try again."
+                );
+
+            }
+
+
+            authButton.disabled = false;
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   SHOW DASHBOARD
+   ========================================================= */
+
+function showDashboard(user) {
+
+    if (authScreen) {
+
+        authScreen.classList.add(
+            "hidden"
+        );
 
     }
 
-    authButton.disabled = true;
 
-    authMessage.textContent =
-        "Logging in...";
+    if (dashboard) {
 
-
-    const { data, error } =
-        await supabaseClient.auth.signInWithPassword({
-
-            email: userEmail,
-
-            password: userPassword
-
-        });
-
-
-    if (error) {
-
-        console.error(error);
-
-        authMessage.textContent =
-            error.message;
-
-        authButton.disabled = false;
-
-        return;
+        dashboard.classList.remove(
+            "hidden"
+        );
 
     }
 
 
-    authMessage.textContent =
-        "Login successful!";
+    if (
+        userName &&
+        user
+    ) {
 
-
-    authScreen.classList.add("hidden");
-
-    dashboard.classList.remove("hidden");
-
-
-    const name =
-        data.user.user_metadata?.full_name ||
-        "VPay User";
-
-
-    if (userName) {
+        const name =
+            user.user_metadata?.full_name ||
+            user.email ||
+            "VPay User";
 
         userName.textContent =
             name;
@@ -106,64 +327,315 @@ authButton.addEventListener("click", async function () {
     }
 
 
-    authButton.disabled = false;
-
-});
-
-
-console.log("VPay Login System Loaded");
-/* ==========================================
-   VPAY BULK FILE UPLOAD
-   ========================================== */
-
-const uploadBulkBtn = document.getElementById("uploadBulkBtn");
-const bulkFileInput = document.getElementById("bulkFileInput");
-
-if (uploadBulkBtn && bulkFileInput) {
-
-    uploadBulkBtn.addEventListener("click", function () {
-
-        console.log("Upload button clicked");
-
-        bulkFileInput.click();
-
-    });
-
-    bulkFileInput.addEventListener("change", function () {
-
-        const file = this.files[0];
-
-        if (!file) return;
-
-        console.log("File selected:", file.name);
-
-        alert("File selected: " + file.name);
-
-    });
+    showAuthMessage("");
 
 }
 
-console.log("VPAY BULK UPLOAD LOADED");
-/* ==========================================
-   VPAY BULK TRANSFER
-   ========================================== */
 
-let bulkRecipients = [];
+/* =========================================================
+   SWITCH LOGIN / SIGNUP
+   ========================================================= */
+
+if (switchAuth) {
+
+    switchAuth.addEventListener(
+        "click",
+        function () {
+
+            signupMode =
+                !signupMode;
+
+
+            if (signupMode) {
+
+                if (nameField) {
+
+                    nameField.classList.remove(
+                        "hidden"
+                    );
+
+                }
+
+
+                if (authTitle) {
+
+                    authTitle.textContent =
+                        "Create your VPay account";
+
+                }
+
+
+                if (authSubtitle) {
+
+                    authSubtitle.textContent =
+                        "Start managing your money smarter.";
+
+                }
+
+
+                if (authButton) {
+
+                    authButton.textContent =
+                        "Create Account";
+
+                }
+
+
+                if (switchText) {
+
+                    switchText.textContent =
+                        "Already have an account?";
+
+                }
+
+
+                switchAuth.textContent =
+                    "Login";
+
+
+            } else {
+
+                if (nameField) {
+
+                    nameField.classList.add(
+                        "hidden"
+                    );
+
+                }
+
+
+                if (authTitle) {
+
+                    authTitle.textContent =
+                        "Welcome to VPay";
+
+                }
+
+
+                if (authSubtitle) {
+
+                    authSubtitle.textContent =
+                        "Manage your money smarter.";
+
+                }
+
+
+                if (authButton) {
+
+                    authButton.textContent =
+                        "Login";
+
+                }
+
+
+                if (switchText) {
+
+                    switchText.textContent =
+                        "Don't have an account?";
+
+                }
+
+
+                switchAuth.textContent =
+                    "Create account";
+
+            }
+
+
+            showAuthMessage("");
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   LOGOUT
+   ========================================================= */
+
+if (logoutButton) {
+
+    logoutButton.addEventListener(
+        "click",
+        async function () {
+
+            try {
+
+                const {
+                    error
+                } =
+                    await supabaseClient.auth.signOut();
+
+
+                if (error) {
+
+                    console.error(
+                        "Logout error:",
+                        error
+                    );
+
+                    return;
+                }
+
+
+                if (dashboard) {
+
+                    dashboard.classList.add(
+                        "hidden"
+                    );
+
+                }
+
+
+                if (authScreen) {
+
+                    authScreen.classList.remove(
+                        "hidden"
+                    );
+
+                }
+
+
+                if (email) {
+
+                    email.value = "";
+
+                }
+
+
+                if (password) {
+
+                    password.value = "";
+
+                }
+
+
+            } catch (error) {
+
+                console.error(
+                    "Logout failed:",
+                    error
+                );
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   CHECK EXISTING SESSION
+   ========================================================= */
+
+async function checkSession() {
+
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient.auth.getSession();
+
+
+        if (error) {
+
+            console.error(
+                "Session error:",
+                error
+            );
+
+            return;
+        }
+
+
+        if (
+            data &&
+            data.session &&
+            data.session.user
+        ) {
+
+            showDashboard(
+                data.session.user
+            );
+
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Session check failed:",
+            error
+        );
+
+    }
+
+}
+
+
+checkSession();
+
+
+/* =========================================================
+   AUTH STATE LISTENER
+   ========================================================= */
+
+supabaseClient.auth.onAuthStateChange(
+    function (
+        event,
+        session
+    ) {
+
+        console.log(
+            "Auth event:",
+            event
+        );
+
+
+        if (
+            session &&
+            session.user
+        ) {
+
+            showDashboard(
+                session.user
+            );
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   VPAY BULK TRANSFER
+   ========================================================= */
 
 
 /* ELEMENTS */
 
 const bulkFileInput =
-    document.getElementById("bulkFileInput");
+    document.getElementById(
+        "bulkFileInput"
+    );
 
 const bulkSummary =
-    document.getElementById("bulkSummary");
+    document.getElementById(
+        "bulkSummary"
+    );
 
 const recipientCount =
-    document.getElementById("recipientCount");
+    document.getElementById(
+        "recipientCount"
+    );
 
 const bulkTotalAmount =
-    document.getElementById("bulkTotalAmount");
+    document.getElementById(
+        "bulkTotalAmount"
+    );
 
 const recipientTableContainer =
     document.getElementById(
@@ -186,9 +658,28 @@ const clearRecipientsBtn =
     );
 
 
-/* ==========================================
-   READ FILE
-   ========================================== */
+/* =========================================================
+   FORMAT MONEY
+   ========================================================= */
+
+function formatMoney(amount) {
+
+    return new Intl.NumberFormat(
+        "en-NG",
+        {
+            style: "currency",
+            currency: "NGN"
+        }
+    ).format(
+        Number(amount) || 0
+    );
+
+}
+
+
+/* =========================================================
+   READ BULK FILE
+   ========================================================= */
 
 if (bulkFileInput) {
 
@@ -199,7 +690,11 @@ if (bulkFileInput) {
             const file =
                 this.files[0];
 
-            if (!file) return;
+            if (!file) {
+
+                return;
+
+            }
 
 
             try {
@@ -257,7 +752,9 @@ if (bulkFileInput) {
                 }
 
 
-                /* CONVERT RECIPIENTS */
+                /* =========================================
+                   CONVERT RECIPIENTS
+                   ========================================= */
 
                 bulkRecipients =
                     rows.map(
@@ -300,10 +797,12 @@ if (bulkFileInput) {
                         function (recipient) {
 
                             return (
-                                recipient.name ||
-                                recipient.accountNumber
-                            ) &&
-                            recipient.amount > 0;
+                                (
+                                    recipient.name ||
+                                    recipient.accountNumber
+                                ) &&
+                                recipient.amount > 0
+                            );
 
                         }
                     );
@@ -353,14 +852,17 @@ if (bulkFileInput) {
 }
 
 
-/* ==========================================
+/* =========================================================
    DISPLAY RECIPIENTS
-   ========================================== */
+   ========================================================= */
 
 function renderBulkRecipients() {
 
-    if (!recipientTableContainer)
+    if (!recipientTableContainer) {
+
         return;
+
+    }
 
 
     const total =
@@ -370,17 +872,17 @@ function renderBulkRecipients() {
                 recipient
             ) {
 
-                return sum +
+                return (
+                    sum +
                     Number(
                         recipient.amount
-                    );
+                    )
+                );
 
             },
             0
         );
 
-
-    /* SUMMARY */
 
     if (bulkSummary) {
 
@@ -406,8 +908,6 @@ function renderBulkRecipients() {
 
     }
 
-
-    /* EMPTY */
 
     if (!bulkRecipients.length) {
 
@@ -444,8 +944,6 @@ function renderBulkRecipients() {
 
     }
 
-
-    /* TABLE */
 
     recipientTableContainer.innerHTML = `
 
@@ -490,6 +988,7 @@ function renderBulkRecipients() {
                                     </td>
 
                                     <td>
+
                                         <strong>
                                             ${
                                                 escapeHTML(
@@ -497,6 +996,7 @@ function renderBulkRecipients() {
                                                 )
                                             }
                                         </strong>
+
                                     </td>
 
                                     <td>
@@ -518,6 +1018,7 @@ function renderBulkRecipients() {
                                     </td>
 
                                     <td>
+
                                         <strong>
                                             ${
                                                 formatMoney(
@@ -525,6 +1026,7 @@ function renderBulkRecipients() {
                                                 )
                                             }
                                         </strong>
+
                                     </td>
 
                                     <td>
@@ -566,9 +1068,9 @@ function renderBulkRecipients() {
 }
 
 
-/* ==========================================
+/* =========================================================
    REMOVE RECIPIENT
-   ========================================== */
+   ========================================================= */
 
 function removeBulkRecipient(index) {
 
@@ -582,9 +1084,15 @@ function removeBulkRecipient(index) {
 }
 
 
-/* ==========================================
+/* Make function available to inline onclick */
+
+window.removeBulkRecipient =
+    removeBulkRecipient;
+
+
+/* =========================================================
    CLEAR ALL
-   ========================================== */
+   ========================================================= */
 
 if (clearRecipientsBtn) {
 
@@ -592,8 +1100,11 @@ if (clearRecipientsBtn) {
         "click",
         function () {
 
-            if (!bulkRecipients.length)
+            if (!bulkRecipients.length) {
+
                 return;
+
+            }
 
 
             if (
@@ -609,7 +1120,13 @@ if (clearRecipientsBtn) {
 
             bulkRecipients = [];
 
-            bulkFileInput.value = "";
+
+            if (bulkFileInput) {
+
+                bulkFileInput.value = "";
+
+            }
+
 
             renderBulkRecipients();
 
@@ -619,9 +1136,9 @@ if (clearRecipientsBtn) {
 }
 
 
-/* ==========================================
+/* =========================================================
    ESCAPE HTML
-   ========================================== */
+   ========================================================= */
 
 function escapeHTML(value) {
 
@@ -652,6 +1169,11 @@ function escapeHTML(value) {
 }
 
 
+/* =========================================================
+   VPAY APP LOADED
+   ========================================================= */
+
 console.log(
-    "VPAY BULK TRANSFER READY"
+    "VPay application loaded successfully."
 );
+```
